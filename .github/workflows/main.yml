@@ -1,0 +1,28 @@
+name: Tilegroma APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleAfatRelease
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: Tilegroma-APK
+          path: TMessagesProj_App/build/outputs/apk/**/*.apk
