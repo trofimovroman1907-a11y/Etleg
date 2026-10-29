@@ -1,0 +1,123 @@
+name: Prepare Etleg settings stage 1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-create-branch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - name: Check out the existing Etleg source
+        uses: actions/checkout@v4
+        with:
+          ref: etleg-design-stage1
+          submodules: recursive
+          persist-credentials: false
+      - name: Apply the Etleg settings patch safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "5e71f98751e03365639dcc37ebe05a541c188f8a" || {
+            echo '::error::etleg-design-stage1 has moved; refusing to overwrite changes. Update this patch first.'
+            exit 1
+          }
+          base64 -d > "$RUNNER_TEMP/etleg-design.patch.gz" <<'ETLEG_PATCH'
+          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
+          ETLEG_PATCH
+          gzip -d -c "$RUNNER_TEMP/etleg-design.patch.gz" > "$RUNNER_TEMP/etleg-design.patch"
+          git apply --check "$RUNNER_TEMP/etleg-design.patch"
+          git apply "$RUNNER_TEMP/etleg-design.patch"
+          git diff --check
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android tools
+        shell: bash
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          test -n "$SDKMANAGER"
+          set +o pipefail
+          yes | "$SDKMANAGER" --install \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;27.2.12479018" \
+            "cmake;3.22.1"
+          result=${PIPESTATUS[1]}
+          set -o pipefail
+          exit "$result"
+      - name: Check Java compilation
+        shell: bash
+        run: |
+          bash ./gradlew --no-daemon --no-parallel --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            :TMessagesProj:compileDebugJavaWithJavac
+      - name: Save checked source in a new branch
+        shell: bash
+        env:
+          GH_PUSH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add TMessagesProj/src/main/java/org/telegram/ui/EtlegSettingsActivity.java TMessagesProj/src/main/java/org/telegram/ui/LoginActivity.java TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java TMessagesProj/src/main/java/org/telegram/ui/ThemeActivity.java TMessagesProj/src/main/res/values/strings.xml TMessagesProj/src/main/res/values-ru/strings.xml
+          git diff --cached --check
+          git diff --cached --quiet && { echo '::error::No design changes to save.'; exit 1; }
+          git commit -m 'Add Etleg customization hub and guard test backend'
+          AUTH=$(printf 'x-access-token:%s' "$GH_PUSH_TOKEN" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin HEAD:refs/heads/etleg-settings-stage1
+          echo '::notice::Settings source saved to etleg-settings-stage1. No APK was built.'
