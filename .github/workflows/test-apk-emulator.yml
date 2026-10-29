@@ -1,0 +1,81 @@
+name: Test Etleg APK installation on emulator
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  install-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download previous test APK
+        uses: actions/download-artifact@v4
+        with:
+          name: Etleg-test-APK-not-for-distribution
+          run-id: 40828483945
+          github-token: ${{ github.token }}
+          path: apk
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install emulator tools
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          test -n "$SDKMANAGER"
+          set +o pipefail
+          yes | "$SDKMANAGER" --install "emulator" "platform-tools" "system-images;android-35;google_apis;x86_64"
+          result=${PIPESTATUS[1]}
+          set -o pipefail
+          exit "$result"
+
+      - name: Boot Android and test installation
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          AVDMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name avdmanager -type f | head -n 1)
+          test -n "$AVDMANAGER"
+          if [ ! -e /dev/kvm ]; then echo '::error::Hardware virtualization is unavailable on the runner'; exit 1; fi
+          sudo chmod a+rw /dev/kvm
+          echo no | "$AVDMANAGER" create avd --force --name etlegtest --package "system-images;android-35;google_apis;x86_64"
+          emulator -avd etlegtest -no-window -no-audio -no-snapshot -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 > "$RUNNER_TEMP/etleg-emulator.log" 2>&1 &
+          timeout 240 adb wait-for-device
+          booted=0
+          for i in $(seq 1 120); do
+            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; then booted=1; break; fi
+            sleep 3
+          done
+          if [ "$booted" != 1 ]; then echo '::error::Emulator did not boot in time'; exit 1; fi
+          echo '::notice title=Emulator::Android 15 x86_64 emulator started. This is not the actual Samsung device.'
+          set +e
+          clean=$(adb install --no-streaming apk/Etleg-test.apk 2>&1)
+          clean_code=$?
+          set -e
+          echo "::notice title=Install on clean Android::${clean//$'\n'/%0A}"
+          if [ "$clean_code" -eq 0 ]; then adb uninstall app.etleg.messenger.web >/dev/null; fi
+          if curl -fsSL --max-time 180 https://telegram.org/dl/android/apk -o "$RUNNER_TEMP/telegram-official.apk"; then
+            set +e
+            official=$(adb install --no-streaming "$RUNNER_TEMP/telegram-official.apk" 2>&1)
+            official_code=$?
+            set -e
+            echo "::notice title=Official Telegram installation::${official//$'\n'/%0A}"
+            if [ "$official_code" -eq 0 ]; then
+              set +e
+              together=$(adb install --no-streaming apk/Etleg-test.apk 2>&1)
+              together_code=$?
+              set -e
+              echo "::notice title=Install alongside official Telegram::${together//$'\n'/%0A}"
+              if [ "$together_code" -ne 0 ]; then echo '::error::Etleg installation failed alongside official Telegram'; exit 1; fi
+            else
+              echo '::warning::Could not install official Telegram on emulator; coexistence not tested.'
+            fi
+          else
+            echo '::warning::Could not download official Telegram; coexistence not tested.'
+          fi
+          if [ "$clean_code" -ne 0 ]; then echo '::error::Etleg installation failed on a clean emulator'; exit 1; fi
