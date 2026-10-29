@@ -1,0 +1,57 @@
+name: Diagnose Etleg APK installation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download previously built APK
+        uses: actions/download-artifact@v4
+        with:
+          name: Etleg-test-APK-not-for-distribution
+          run-id: 40828483945
+          github-token: ${{ github.token }}
+          path: apk
+
+      - name: Inspect package metadata without printing app data
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re, subprocess, sys, zipfile
+          apk = pathlib.Path('apk/Etleg-test.apk')
+          if not apk.is_file():
+              sys.exit('Test APK was not found in the downloaded artifact.')
+          tools = pathlib.Path(os.environ['ANDROID_HOME']) / 'build-tools' / '36.0.0'
+          aapt = str(tools / 'aapt')
+          signer = str(tools / 'apksigner')
+          def notice(title, value):
+              value = value.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print('::notice title=' + title + '::' + value)
+          def run(cmd):
+              p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+              if p.returncode != 0:
+                  print('Tool failed:', pathlib.Path(cmd[0]).name, 'exit', p.returncode)
+                  print(p.stdout[-2000:])
+                  sys.exit(p.returncode)
+              return p.stdout
+          badging = run([aapt, 'dump', 'badging', str(apk)])
+          labels = ('package:', 'sdkVersion:', 'targetSdkVersion:', 'native-code:', 'uses-feature-required:')
+          basic = [line for line in badging.splitlines() if line.startswith(labels)]
+          notice('Package and SDK', '\n'.join(basic))
+          manifest = run([aapt, 'dump', 'xmltree', str(apk), 'AndroidManifest.xml'])
+          authorities = [line.strip() for line in manifest.splitlines() if 'android:authorities' in line or 'android:sharedUserId' in line]
+          notice('Providers and shared user', '\n'.join(authorities) if authorities else 'None found')
+          sig = run([signer, 'verify', '--verbose', '--print-certs', str(apk)])
+          notice('APK signature', '\n'.join(line for line in sig.splitlines() if line.startswith(('Verified', 'Signer #1 certificate SHA-256 digest'))))
+          with zipfile.ZipFile(apk) as z:
+              libs = [x for x in z.namelist() if re.match(r'^lib/[^/]+/[^/]+\.so$', x)]
+          abis = sorted({x.split('/')[1] for x in libs})
+          notice('Native libraries', 'ABIs: ' + ', '.join(abis) + '; library count: ' + str(len(libs)))
+          print('Metadata inspection complete. This does not expose API credentials or diagnose the phone by itself.')
+          PY
