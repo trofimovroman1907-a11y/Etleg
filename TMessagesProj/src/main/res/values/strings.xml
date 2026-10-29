@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="EtlegSettingsTitle">Etleg settings</string>
+    <string name="EtlegAppearanceSection">Appearance</string>
+    <string name="EtlegThemesAndAccent">Themes and accent color</string>
+    <string name="EtlegChatBackground">Chat background</string>
+    <string name="EtlegBubbleCorners">Message corners</string>
+    <string name="EtlegTextSize">Text size</string>
+    <string name="EtlegChatList">Chat list</string>
+    <string name="EtlegNightMode">Night mode</string>
+    <string name="EtlegMotionSection">Motion</string>
+    <string name="EtlegMotionAndPower">Animations and power saving</string>
     <string name="EtlegIntroDescription">Etleg is an unofficial Telegram client. Your messages stay connected to Telegram.</string>
     <string name="AppName">Etleg</string>
     <string name="AppNameBeta">Telegram Beta</string>

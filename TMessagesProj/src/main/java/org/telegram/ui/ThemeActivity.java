@@ -258,6 +258,13 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
 
     private RLottieDrawable sunDrawable;
 
+    // Jump to existing, functional Telegram theme controls from the Etleg hub.
+    private int etlegSection;
+    public ThemeActivity openEtlegSection(int section) {
+        etlegSection = section;
+        return this;
+    }
+
     private boolean highlightSensitiveRow;
     public ThemeActivity highlightSensitiveRow() {
         this.highlightSensitiveRow = true;
@@ -1508,6 +1515,13 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             }, 200);
         }
 
+        if (etlegSection != 0 && currentType == THEME_TYPE_BASIC) {
+            final int row = etlegSection == 1 ? themeHeaderRow : etlegSection == 2 ? backgroundRow : etlegSection == 3 ? bubbleRadiusHeaderRow : etlegSection == 4 ? textSizeHeaderRow : chatListHeaderRow;
+            etlegSection = 0;
+            if (row >= 0) {
+                listView.scrollToPosition(row);
+            }
+        }
         return fragmentView;
     }
 

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="EtlegSettingsTitle">Настройки Etleg</string>
+    <string name="EtlegAppearanceSection">Оформление</string>
+    <string name="EtlegThemesAndAccent">Темы и цвет акцента</string>
+    <string name="EtlegChatBackground">Фон переписки</string>
+    <string name="EtlegBubbleCorners">Скругление сообщений</string>
+    <string name="EtlegTextSize">Размер текста</string>
+    <string name="EtlegChatList">Вид списка чатов</string>
+    <string name="EtlegNightMode">Ночной режим</string>
+    <string name="EtlegMotionSection">Движение</string>
+    <string name="EtlegMotionAndPower">Анимации и энергосбережение</string>
     <string name="EtlegIntroDescription">Etleg — неофициальный клиент Telegram. Ваши сообщения остаются в Telegram.</string>
     <string name="AppName">Etleg</string>
     <string name="AppNameBeta">Telegram Beta</string>
