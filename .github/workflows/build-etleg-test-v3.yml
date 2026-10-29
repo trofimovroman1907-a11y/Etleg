@@ -1,0 +1,155 @@
+name: Build Etleg test APK v3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      TG_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+      TG_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+      FIREBASE_JSON: ${{ secrets.FIREBASE_CONFIG_JSON }}
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+    steps:
+      - name: Validate build settings
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys
+          api_id = os.environ.get('TG_API_ID', '').strip()
+          api_hash = os.environ.get('TG_API_HASH', '').strip()
+          if not re.fullmatch(r'[0-9]+', api_id) or int(api_id) <= 0:
+              sys.exit('TELEGRAM_API_ID is missing or invalid')
+          if not re.fullmatch(r'[0-9a-fA-F]{32}', api_hash):
+              sys.exit('TELEGRAM_API_HASH is missing or invalid')
+          try:
+              config = json.loads(os.environ.get('FIREBASE_JSON', ''))
+              clients = config['client']
+              names = [c['client_info']['android_client_info']['package_name'] for c in clients]
+          except (KeyError, TypeError, ValueError):
+              sys.exit('FIREBASE_CONFIG_JSON is missing or invalid')
+          if 'app.etleg.messenger.web' not in names:
+              sys.exit('Firebase config does not contain app.etleg.messenger.web')
+          print('Required build settings are present')
+          PY
+
+      - uses: actions/checkout@v4
+        with:
+          ref: etleg-changes
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android tools
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          test -n "$SDKMANAGER"
+          set +o pipefail
+          yes | "$SDKMANAGER" --install \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;27.2.12479018" \
+            "cmake;3.22.1"
+          result=${PIPESTATUS[1]}
+          set -o pipefail
+          exit "$result"
+
+      - name: Download previous APK for diagnosis
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: Etleg-test-APK-not-for-distribution
+          run-id: 40828483945
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/etleg-previous
+
+      - name: Check previous APK installation flag
+        run: |
+          python3 - <<'PYCODE'
+          import os, pathlib, subprocess
+          old = pathlib.Path(os.environ['RUNNER_TEMP']) / 'etleg-previous/Etleg-test.apk'
+          if not old.exists():
+              print('::warning::Previous APK not available; skipping comparison')
+          else:
+              aapt = pathlib.Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0/aapt'
+              out = subprocess.check_output([str(aapt), 'dump', 'xmltree', str(old), 'AndroidManifest.xml'], text=True)
+              lines = [x.strip() for x in out.splitlines() if 'android:testOnly' in x]
+              print('::notice title=Previous APK test-only flag::' + ('; '.join(lines) if lines else 'Not present'))
+          PYCODE
+
+      - name: Configure temporary test build
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re
+          p = pathlib.Path('TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java')
+          src = p.read_text()
+          src, n1 = re.subn(r'public static int APP_ID = \d+;', 'public static int APP_ID = ' + str(int(os.environ['TG_API_ID'])) + ';', src)
+          src, n2 = re.subn(r'public static String APP_HASH = "[^"]*";', 'public static String APP_HASH = "' + os.environ['TG_API_HASH'].strip() + '";', src)
+          if n1 != 1 or n2 != 1:
+              raise SystemExit('Could not locate Telegram API settings')
+          p.write_text(src)
+          pathlib.Path('TMessagesProj_AppStandalone/google-services.json').write_text(os.environ['FIREBASE_JSON'])
+          PY
+          rm -f TMessagesProj/config/release.keystore
+          keytool -genkeypair -noprompt -alias etlegtest \
+            -keyalg RSA -keysize 2048 -validity 30 \
+            -keystore TMessagesProj/config/release.keystore \
+            -storepass etleg-test-only -keypass etleg-test-only \
+            -dname "CN=Etleg Test, O=Etleg Test, C=US"
+
+      - name: Build test APK for arm64
+        run: |
+          bash ./gradlew --no-daemon --no-parallel --max-workers=1 \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Pandroid.injected.build.abi=arm64-v8a \
+            -Pandroid.injected.testOnly=false \
+            -PRELEASE_KEY_ALIAS=etlegtest \
+            -PRELEASE_KEY_PASSWORD=etleg-test-only \
+            -PRELEASE_STORE_PASSWORD=etleg-test-only \
+            :TMessagesProj_AppStandalone:assembleAfatDebug
+
+      - name: Locate and verify APK
+        run: |
+          python3 - <<'PYCODE'
+          import os, pathlib, re, shutil, subprocess, sys
+          root = pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          aapt = pathlib.Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0/aapt'
+          candidates = list(root.rglob('*.apk'))
+          print('APK files found:', len(candidates))
+          matches = []
+          for apk in candidates:
+              print('Checking:', apk.relative_to(root))
+              out = subprocess.run([str(aapt), 'dump', 'badging', str(apk)], capture_output=True, text=True)
+              m = re.search(r"^package: name='([^']+)'", out.stdout, re.MULTILINE)
+              if out.returncode == 0 and m and m.group(1) == 'app.etleg.messenger.web':
+                  matches.append(apk)
+          if len(matches) != 1:
+              sys.exit('Expected exactly one Etleg APK; found ' + str(len(matches)))
+          manifest = subprocess.check_output([str(aapt), 'dump', 'xmltree', str(matches[0]), 'AndroidManifest.xml'], text=True)
+          test_flags = [line.strip() for line in manifest.splitlines() if 'android:testOnly' in line]
+          print('New APK test-only attributes:', test_flags if test_flags else 'absent')
+          for line in test_flags:
+              if not re.search(r'=\(type 0x12\)0x0+\b', line):
+                  sys.exit('The APK is marked test-only or test-only attribute could not be verified')
+          target = pathlib.Path(os.environ['RUNNER_TEMP']) / 'etleg-output'
+          target.mkdir(parents=True, exist_ok=True)
+          shutil.copyfile(matches[0], target / 'Etleg-test.apk')
+          print('Etleg package verified')
+          PYCODE
+
+      - name: Upload test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Etleg-test-v3-not-for-distribution
+          path: ${{ runner.temp }}/etleg-output/Etleg-test.apk
+          if-no-files-found: error
+          retention-days: 3
