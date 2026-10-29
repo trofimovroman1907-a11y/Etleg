@@ -1,0 +1,159 @@
+name: Prepare Etleg design stage 1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-create-branch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - name: Check out the existing Etleg source
+        uses: actions/checkout@v4
+        with:
+          ref: etleg-changes
+          submodules: recursive
+          persist-credentials: false
+      - name: Apply the first design patch safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "305c1aa1e659a80cb1cd1bc9cb8623984f8eb2eb" || {
+            echo '::error::etleg-changes has moved; refusing to overwrite changes. Update this patch first.'
+            exit 1
+          }
+          base64 -d > "$RUNNER_TEMP/etleg-design.patch.gz" <<'ETLEG_PATCH'
+          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
+          ETLEG_PATCH
+          gzip -d -c "$RUNNER_TEMP/etleg-design.patch.gz" > "$RUNNER_TEMP/etleg-design.patch"
+          git apply --check "$RUNNER_TEMP/etleg-design.patch"
+          git apply "$RUNNER_TEMP/etleg-design.patch"
+          git diff --check
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android tools
+        shell: bash
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          test -n "$SDKMANAGER"
+          set +o pipefail
+          yes | "$SDKMANAGER" --install \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;27.2.12479018" \
+            "cmake;3.22.1"
+          result=${PIPESTATUS[1]}
+          set -o pipefail
+          exit "$result"
+      - name: Check Java compilation
+        shell: bash
+        run: |
+          bash ./gradlew --no-daemon --no-parallel --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            :TMessagesProj:compileDebugJavaWithJavac
+      - name: Save checked source in a new branch
+        shell: bash
+        env:
+          GH_PUSH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add TMessagesProj/src/main/assets/bluebubbles.attheme TMessagesProj/src/main/assets/darkblue.attheme TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java TMessagesProj/src/main/java/org/telegram/ui/LoginActivity.java TMessagesProj/src/main/res/values/strings.xml TMessagesProj/src/main/res/values-ru/strings.xml
+          git diff --cached --check
+          git diff --cached --quiet && { echo '::error::No design changes to save.'; exit 1; }
+          git commit -m 'Start Etleg visual redesign and login branding'
+          AUTH=$(printf 'x-access-token:%s' "$GH_PUSH_TOKEN" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin HEAD:refs/heads/etleg-design-stage1
+          echo '::notice::First-stage source saved to etleg-design-stage1. No APK was built.'
