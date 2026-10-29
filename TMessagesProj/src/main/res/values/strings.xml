@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="etleg_account_type" translatable="false">app.etleg.messenger.account</string>
+    <string name="etleg_account_package" translatable="false">app.etleg.messenger.web</string>
     <string name="EtlegSettingsTitle">Etleg settings</string>
     <string name="EtlegAppearanceSection">Appearance</string>
     <string name="EtlegThemesAndAccent">Themes and accent color</string>
