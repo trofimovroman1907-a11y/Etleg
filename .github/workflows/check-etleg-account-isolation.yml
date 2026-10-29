@@ -1,0 +1,92 @@
+name: Check Etleg account isolation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-create-branch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - name: Check out the existing Etleg source
+        uses: actions/checkout@v4
+        with:
+          ref: etleg-settings-stage1
+          submodules: recursive
+          persist-credentials: false
+      - name: Apply account isolation safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "364903c00ee3177409503a35d83b5f92bd618d50" || {
+            echo '::error::etleg-settings-stage1 has moved; refusing to overwrite changes. Update this patch first.'
+            exit 1
+          }
+          base64 -d > "$RUNNER_TEMP/etleg-design.patch.gz" <<'ETLEG_PATCH'
+          H4sIAAAAAAAC/+2X3U/jOBDA3/krrDwVlSSU0i+gXVjEA9IucEt52ltVjjMp2XWcynaA6nT/+43jhNIv2kI57UnnF8PUM57x/Dzj
+          hHEUEdcdxppQv/8VlKJDUDcy/ekryfyExsL/SR+on8qhr4HDUNLET3AdiCFI/zwVmjKtzCxTzkF6ZjkJtmhsJxYhPBFab+zTIPI8
+          1m5HrbBJavv7zcPDHdd1t+r7TrVa3a7/p6fErXdqey1StRMKRlnAY0YYp0qReUUCTxpEqMhnquCF+K8dUo47HfNYx6C8IU8Dyv/I
+          IANvlCr9LROCBhwqlV3i9l7qmHHGWJoJ/ZUKjE4SmpDujMwbgq6cjUboINVxKr6kNEQpnUiMR+jh7vG0aS3HuJtLZkZh/fsPQu1f
+          Crekidmm+El9HvfHI6g4eLJeebLe88k6uFH17VbXCcWo3WoZi2Hlm6fyPzzQ6MigsD7QaGp3NmIzolSSSizwBqED+8c4nTy75HEM
+          QN+jsFrdnc3ETCRGyYRQqH6nP44Xrw/SlAMVuHEmQtSIKFdwnGN2eFA3mNlpK5iVQwINSwOVRccQR6SixkpDUsbT7RKRcb407iW4
+          lGPGGBHwWB5VxXFIlWDK7hRI9CqKh5Vdk8JzHoPIpZdhZXePbALUNvf9YOTKgTHRMCycu3gyO8Saj6fzgKfg7NlMLDH1N0HH2D2p
+          XDwxGBkXSTwUqYQ8dRaseisHK5+2ApbN/usnjz4ff2T1cj+2TP0WJepd5WmT0vRKWWrU8rJkp62WpTMRyjQOJ81QZuJa3F32703B
+          WtwB/4VOuGaJ+5jO+Nt1yA3u91Yb6xoU53TW87eZnd5F55Ly+n/7+y+3v3CNbyQJyn+gPMPJhqK8p4Qv/4xYvL740gnCdj1ohJ7X
+          pI1m64Ct9aWzxOKrHzNLdMydqO01SNXehx1y8skE8wBS4dl0nZq37xAQLA1RpetkOnLbzqcerkODaSYZqJ7l68SaJYIm0HXms+vg
+          JaBCcarN90rXyVuG00NYLAoTZL1C7aTwdI0NRpT9wpg32OMRgol9Mm//wqy/Ba3NUfURNbSTy4gqhKvV8WoARYcY3AIzrDm9iWi1
+          ev8e0F/sekg3XjmnZwWEYsuluYiwlKdyYmldfDHFPs30/WpwX64skD0MWacTHXheLWy1Go3W2shO2VoJ69Rqi2lrc0xxZcGIa4zh
+          mZnKhM0G1YU6ovZJ0XXutR4d+b5ieMRUeYXcY2ni09Gv3KFC5tgyXvx3VFg3rbW7rARbfhdqnNrU+Qvui+Wi1IqZifM0lPTRsO3H
+          bMBpJtBfOQjlzGKVUM4vN9HgNAA+cQcxvUIQnY2JGiQgsvWxel5esNVpBx3a2ve8sB0GQT3amK2JwbUBm6gYypqGsmZB2XPzKU5J
+          mzrw4pRsusoq4cwrqCxJqBx3Hac3+fEE3znm8k6A0DnEi+nxrm8urgZn5+fXd1d9Z/oN8ewXldhhb2wRXIHhCt3FQJb1dbqpTps4
+          N2+omc2z2PuSM3eGMT7Eeuz4Zb3zbyREIMFURyYBhGkqC4SbEKjGgg1Y8Ypbj8I5lZJE6HSaB4AksqgW1WAjEueNrkXjvJqte3VT
+          9+q27pk1Lg3pSMO7ithUAs2eSOQZ3oZUYpa6Duq80LcevaHyYbb/JFepeVjyWAChGqt0SNKIRDGHt9XFFTb/AYn9WsHnFgAA
+          ETLEG_PATCH
+          gzip -d -c "$RUNNER_TEMP/etleg-design.patch.gz" > "$RUNNER_TEMP/etleg-design.patch"
+          git apply --check "$RUNNER_TEMP/etleg-design.patch"
+          git apply "$RUNNER_TEMP/etleg-design.patch"
+          git diff --check
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android tools
+        shell: bash
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)
+          test -n "$SDKMANAGER"
+          set +o pipefail
+          yes | "$SDKMANAGER" --install \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;27.2.12479018" \
+            "cmake;3.22.1"
+          result=${PIPESTATUS[1]}
+          set -o pipefail
+          exit "$result"
+      - name: Check Java compilation
+        shell: bash
+        run: |
+          bash ./gradlew --no-daemon --no-parallel --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            :TMessagesProj:compileDebugJavaWithJavac
+      - name: Save checked source in a new branch
+        shell: bash
+        env:
+          GH_PUSH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add TMessagesProj/src/main/java/org/telegram/messenger/ContactsController.java TMessagesProj/src/main/res/values/strings.xml TMessagesProj/src/main/res/xml/auth.xml TMessagesProj/src/main/res/xml/auth_menu.xml TMessagesProj/src/main/res/xml/sync_contacts.xml
+          git diff --cached --check
+          git diff --cached --quiet && { echo '::error::No design changes to save.'; exit 1; }
+          git commit -m 'Isolate Etleg Android account integration'
+          AUTH=$(printf 'x-access-token:%s' "$GH_PUSH_TOKEN" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin HEAD:refs/heads/etleg-account-isolation
+          echo '::notice::Account isolation source saved to etleg-account-isolation. No APK was built.'
