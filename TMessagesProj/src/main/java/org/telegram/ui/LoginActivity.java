@@ -3756,6 +3756,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     blueImageView.setTranslationY(-AndroidUtilities.dp(24));
                 }
                 frameLayout.addView(blueImageView, LayoutHelper.createFrame(size, size, Gravity.LEFT | Gravity.TOP, 0, 0, 0, currentType == AUTH_TYPE_MESSAGE && !AndroidUtilities.isSmallScreen() ? -AndroidUtilities.dp(16) : 0));
+                if (currentType == AUTH_TYPE_MESSAGE) {
+                    // Preserve the original login logic while displaying Etleg branding.
+                    blueImageView.setVisibility(View.INVISIBLE);
+                    ImageView etlegLogo = new ImageView(context);
+                    etlegLogo.setImageResource(R.drawable.etleg_launcher);
+                    if (!AndroidUtilities.isSmallScreen()) {
+                        etlegLogo.setTranslationY(-AndroidUtilities.dp(24));
+                    }
+                    frameLayout.addView(etlegLogo, LayoutHelper.createFrame(size, size, Gravity.LEFT | Gravity.TOP, 0, 0, 0, !AndroidUtilities.isSmallScreen() ? -AndroidUtilities.dp(16) : 0));
+                }
                 titleTextView.setText(overrideTitle != null ? overrideTitle : getString(currentType == AUTH_TYPE_MESSAGE ? R.string.SentAppCodeTitle : R.string.SentSmsCodeTitle));
                 addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 18, 0, 0));
                 int sideMargin = currentType == AUTH_TYPE_FRAGMENT_SMS ? 16 : 0;

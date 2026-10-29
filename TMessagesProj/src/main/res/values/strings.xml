@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="EtlegIntroDescription">Etleg is an unofficial Telegram client. Your messages stay connected to Telegram.</string>
     <string name="AppName">Etleg</string>
     <string name="AppNameBeta">Telegram Beta</string>
     <string name="LanguageName">English</string>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="EtlegIntroDescription">Etleg — неофициальный клиент Telegram. Ваши сообщения остаются в Telegram.</string>
     <string name="AppName">Etleg</string>
     <string name="AppNameBeta">Telegram Beta</string>
     <string name="LanguageName">Русский</string>
