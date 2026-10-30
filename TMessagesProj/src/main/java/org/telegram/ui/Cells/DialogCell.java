@@ -171,8 +171,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     public ShareDialogCell.RepostStoryDrawable repostStoryDrawable;
     public int avatarStart = 14;
     public int messagePaddingStart = 80;
-    public int heightDefault = EtlegPreferences.getChatRowHeight(80);
-    public int heightThreeLines = EtlegPreferences.getChatRowHeight(92);
+    public int heightDefault = 80;
+    public int heightThreeLines = 92;
     public int addHeightForTags = 3;
     public int addForumHeightForTags = 11;
     public TLRPC.TL_forumTopic forumTopic;
@@ -1012,7 +1012,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private int computeHeight() {
         int height;
         if (isForumCell() && !isTransitionSupport && !collapsed) {
-            height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91);
+            height = dp(getEtlegChatRowHeight(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91));
             if (useSeparator) {
                 height += 1;
             }
@@ -1025,8 +1025,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         return height;
     }
 
+    private int getEtlegChatRowHeight(int normalHeight) {
+        if (EtlegAppearance.isEtlegApp() && EtlegPreferences.isCompactChatList()) {
+            return EtlegPreferences.getChatRowHeight(normalHeight);
+        }
+        return normalHeight;
+    }
+
     private int getCollapsedHeight() {
-        int height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault);
+        int normalHeight = useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault;
+        int height = dp(getEtlegChatRowHeight(normalHeight));
         if (useSeparator || true) {
             height += 1;
         }
