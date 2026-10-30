@@ -41,6 +41,7 @@ import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
@@ -269,6 +270,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     @Override
     public void onResume() {
         super.onResume();
+        EtlegAppearance.applyTheme();
         blur3_updateColors();
         checkContactsTabBadge();
         checkUnreadCount(true);
@@ -300,6 +302,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
     @Override
     public View createView(Context context) {
+        EtlegAppearance.applyTheme();
         super.createView(context);
         tabletLayout = false;
 
