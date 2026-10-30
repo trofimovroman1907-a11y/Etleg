@@ -363,32 +363,24 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         final ViewPositionWatcher viewPositionWatcher = new ViewPositionWatcher(contentView);
 
-        if (EtlegAppearance.isEtlegApp()) {
-            tabsViewBackground = null;
-            tabsView.setBackground(Theme.createRoundRectDrawable(dp(27), getThemedColor(Theme.key_dialogBackground)));
-            tabsView.setElevation(dp(12));
-        } else {
-            BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
-            iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
-            iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
+        // Etleg uses the native blur renderer too: the dock stays translucent
+        // while the content behind it scrolls, instead of becoming an opaque pill.
+        BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
+        iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
+        iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
 
-            tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
-            tabsViewBackground.setRadius(dp(DialogsActivity.MAIN_TABS_HEIGHT / 2f));
-            tabsViewBackground.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN - 0.334f));
-            tabsView.setBackground(tabsViewBackground);
-        }
+        tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
+        tabsViewBackground.setRadius(dp(28));
+        tabsViewBackground.setPadding(dp(1.25f));
+        tabsView.setBackground(tabsViewBackground);
+        tabsView.setElevation(dp(14));
 
         fadeView = new View(context);
-        if (EtlegAppearance.isEtlegApp()) {
-            // Etleg uses a clean, opaque dock surface rather than Telegram's glass fade.
-            fadeView.setBackgroundColor(0x00000000);
-        } else {
-            BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
-            iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
-            BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
-            fadeDrawable.setFadeHeight(dp(60), true);
-            fadeView.setBackground(fadeDrawable);
-        }
+        BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
+        iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
+        BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
+        fadeDrawable.setFadeHeight(dp(72), true);
+        fadeView.setBackground(fadeDrawable);
         contentView.addView(fadeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 0, Gravity.BOTTOM));
 
         tabsViewWrapper = new FrameLayout(context);
