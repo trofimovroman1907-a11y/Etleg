@@ -4029,10 +4029,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
 
         if (EtlegAppearance.isEtlegApp()) {
-            float cardInset = dp(7);
-            etlegCardRect.set(cardInset, dp(3), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(3));
+            float cardInset = dp(10);
+            etlegCardRect.set(cardInset, dp(4), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(4));
             etlegCardPaint.setColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
-            canvas.drawRoundRect(etlegCardRect, dp(EtlegAppearance.getDialogCardRadiusDp()), dp(EtlegAppearance.getDialogCardRadiusDp()), etlegCardPaint);
+            canvas.drawRoundRect(etlegCardRect, dp(22), dp(22), etlegCardPaint);
         }
 
         float cornersRadius = dp(EtlegAppearance.isEtlegApp() ? 16 : 8) * cornerProgress;
@@ -4831,7 +4831,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             canvas.restore();
         }
 
-        if (useSeparator) {
+        if (useSeparator && !EtlegAppearance.isEtlegApp()) {
             int left;
             if (fullSeparator || currentDialogFolderId != 0 && archiveHidden && !fullSeparator2 || fullSeparator2 && !archiveHidden) {
                 left = 0;
