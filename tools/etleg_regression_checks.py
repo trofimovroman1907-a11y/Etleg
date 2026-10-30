@@ -35,6 +35,11 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("response instanceof TLRPC.auth_SentCode", body)
         self.assertNotIn("((TLRPC.auth_SentCode) response).type", body)
 
+    def test_etleg_does_not_request_telegram_only_sms_attestation_or_hash(self):
+        body = method_body(self.login, "public void onNextPressed(String code)")
+        self.assertIn("settings.allow_firebase = false;", body)
+        self.assertIn("settings.allow_app_hash = false;", body)
+
     def test_etleg_settings_are_reachable_from_settings_screen(self):
         self.assertIn("case 27:", self.settings)
         self.assertIn("presentSettingFragment(new EtlegSettingsActivity())", self.settings)
