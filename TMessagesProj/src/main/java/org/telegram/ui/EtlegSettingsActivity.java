@@ -172,7 +172,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         if (content.getChildCount() == 0 || !(content.getChildAt(content.getChildCount() - 1) instanceof LinearLayout)) {
             card = new LinearLayout(context);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+            card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
+            card.setElevation(AndroidUtilities.dp(2));
             content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
         } else {
             View previous = content.getChildAt(content.getChildCount() - 1);
@@ -183,7 +184,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         if (card == null) {
             card = new LinearLayout(context);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+            card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
+            card.setElevation(AndroidUtilities.dp(2));
             content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
         }
         addSwitchRow(context, row, card);
@@ -239,7 +241,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addActionCard(Context context, int iconRes, int titleRes, Runnable action) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
+            card.setElevation(AndroidUtilities.dp(2));
         addActionRow(context, iconRes, titleRes, action, card);
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
     }
