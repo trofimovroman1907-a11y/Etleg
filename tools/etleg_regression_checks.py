@@ -126,10 +126,23 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("LayoutHelper.createLinear(40, 40", settings)
         self.assertIn("title.setTextSize(14)", settings)
         self.assertIn("LayoutHelper.createLinear(34, 34", settings)
-        self.assertIn("? 348 : 328", tabs)
-        self.assertIn("tabsViewBackground.setRadius(dp(28));", tabs)
-        self.assertIn("tabsView.setElevation(dp(16));", tabs)
+        self.assertIn("? 360 : 328", tabs)
+        self.assertIn("tabsViewBackground.setRadius(dp(30));", tabs)
+        self.assertIn("tabsView.setElevation(dp(18));", tabs)
         self.assertIn("EtlegAppearance.isEtlegApp()", tabs)
+
+    def test_etleg_conversation_list_uses_roomier_native_metrics(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java").read_text()
+        self.assertIn("avatarStart = 16;", source)
+        self.assertIn("messagePaddingStart = 84;", source)
+        self.assertIn("heightDefault = 88;", source)
+        self.assertIn("heightThreeLines = 100;", source)
+        self.assertIn("? 98 : 104", source)
+
+    def test_etleg_surface_radii_share_the_new_rounder_visual_language(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/messenger/EtlegAppearance.java").read_text()
+        self.assertIn("return 23;", source)
+        self.assertIn("return 21;", source)
 
 
 if __name__ == "__main__":
