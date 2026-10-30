@@ -312,7 +312,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         tabsView = new MainTabsLayout(context, resourceProvider);
         tabsView.setClipChildren(false);
-        final int dockInset = EtlegAppearance.isEtlegApp() ? 12 : DialogsActivity.MAIN_TABS_MARGIN + 4;
+        final int dockInset = EtlegAppearance.isEtlegApp() ? 9 : DialogsActivity.MAIN_TABS_MARGIN + 4;
         tabsView.setPadding(dp(dockInset), dp(dockInset), dp(dockInset), dp(dockInset));
         tabsView.setMaxWidth(dp((EtlegAppearance.isEtlegApp() ? 360 : 328) + DialogsActivity.MAIN_TABS_MARGIN * 2));
 

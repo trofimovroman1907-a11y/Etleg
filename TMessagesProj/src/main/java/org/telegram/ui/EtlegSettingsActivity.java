@@ -226,14 +226,14 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         LinearLayout line = new LinearLayout(context);
         line.setGravity(Gravity.CENTER_VERTICAL);
         line.setOrientation(LinearLayout.HORIZONTAL);
-        line.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(13), AndroidUtilities.dp(14), AndroidUtilities.dp(13));
+        line.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(15), AndroidUtilities.dp(14), AndroidUtilities.dp(15));
 
         ImageView icon = new ImageView(context);
         icon.setImageResource(row.icon);
         icon.setColorFilter(accentColor);
         icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(13), Theme.multAlpha(accentColor, 0.12f)));
         icon.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
-        line.addView(icon, LayoutHelper.createLinear(42, 42, Gravity.CENTER_VERTICAL, 0, 0, 13, 0));
+        line.addView(icon, LayoutHelper.createLinear(44, 44, Gravity.CENTER_VERTICAL, 0, 0, 13, 0));
 
         LinearLayout labels = new LinearLayout(context);
         labels.setOrientation(LinearLayout.VERTICAL);
@@ -295,17 +295,17 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addActionRow(Context context, int iconRes, int titleRes, Runnable action, LinearLayout card) {
         LinearLayout line = new LinearLayout(context);
         line.setGravity(Gravity.CENTER_VERTICAL);
-        line.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(12), AndroidUtilities.dp(16), AndroidUtilities.dp(12));
+        line.setPadding(AndroidUtilities.dp(14), AndroidUtilities.dp(9), AndroidUtilities.dp(14), AndroidUtilities.dp(9));
         ImageView icon = new ImageView(context);
         icon.setImageResource(iconRes);
         icon.setColorFilter(accentColor);
         icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(13), Theme.multAlpha(accentColor, 0.12f)));
-        icon.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
-        line.addView(icon, LayoutHelper.createLinear(42, 42, Gravity.CENTER_VERTICAL, 0, 0, 13, 0));
+        icon.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
+        line.addView(icon, LayoutHelper.createLinear(36, 36, Gravity.CENTER_VERTICAL, 0, 0, 11, 0));
         TextView title = new TextView(context);
         title.setText(LocaleController.getString(titleRes));
         title.setTextColor(textColor);
-        title.setTextSize(15);
+        title.setTextSize(14);
         title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         line.addView(title, new LinearLayout.LayoutParams(0, LayoutHelper.WRAP_CONTENT, 1f));
         TextView arrow = new TextView(context);
