@@ -87,6 +87,7 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("isReducedMotion", source)
         self.assertIn("isHapticEnabled", source)
         self.assertIn("isTabLabelsEnabled", source)
+        self.assertIn("isAutoHideDockEnabled", source)
 
     def test_etleg_navigation_uses_custom_static_icons_and_preferences(self):
         source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Components/glass/GlassTabView.java").read_text()
@@ -95,6 +96,7 @@ class EtlegRegressionChecks(unittest.TestCase):
         tabs = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java").read_text()
         self.assertIn("EtlegPreferences.isReducedMotion()", tabs)
         self.assertIn("EtlegPreferences.performHapticFeedback", tabs)
+        self.assertIn("EtlegPreferences.isAutoHideDockEnabled()", tabs)
 
     def test_etleg_compact_chat_rows_are_package_gated(self):
         source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java").read_text()
