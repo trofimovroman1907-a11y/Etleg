@@ -108,10 +108,10 @@ public final class EtlegAppearance {
 
             set(Theme.key_chats_name, 0xFF203437);
             set(Theme.key_chats_message, 0xFF728785);
-            set(Theme.key_chat_inBubble, 0xFFFFFFFF);
+            set(Theme.key_chat_inBubble, 0xEFFFFFFF);
             set(Theme.key_chat_inBubbleSelected, 0xFFE6F1EF);
             set(Theme.key_chat_inBubbleShadow, 0x140D3435);
-            set(Theme.key_chat_outBubble, 0xFFD6ECE6);
+            set(Theme.key_chat_outBubble, 0xE8D6ECE6);
             set(Theme.key_chat_outBubbleSelected, 0xFFC5E4DC);
             set(Theme.key_chat_outBubbleShadow, 0x140D3435);
             set(Theme.key_chat_messageTextIn, 0xFF203437);
@@ -178,7 +178,7 @@ public final class EtlegAppearance {
             set(Theme.key_profile_title, 0xFFE5EFED);
             set(Theme.key_profile_status, 0xFF9CB0AE);
             set(Theme.key_profile_actionIcon, 0xFFB5D0CC);
-            set(Theme.key_profile_actionBackground, 0xFF22383B);
+            set(Theme.key_profile_actionBackground, 0xCC22383B);
             set(Theme.key_profile_actionPressedBackground, 0xFF2B4A4D);
             set(Theme.key_profile_tabText, 0xFF9CB0AE);
             set(Theme.key_profile_tabSelectedText, 0xFF83D2C7);
@@ -191,6 +191,26 @@ public final class EtlegAppearance {
             set(Theme.key_chats_menuBackground, 0xE6253539);
             set(Theme.key_chats_menuItemText, 0xFFE5EFED);
             set(Theme.key_chats_menuItemIcon, 0xFF9DB8B4);
+            set(Theme.key_chats_archiveBackground, 0xD92B4145);
+            set(Theme.key_chats_archivePinBackground, 0xFF36585B);
+            set(Theme.key_chats_archiveIcon, 0xFFB2C7C4);
+            set(Theme.key_chats_archiveText, 0xFFB2C7C4);
+            set(Theme.key_chats_actionIcon, 0xFFB2C7C4);
+            set(Theme.key_chats_actionBackground, 0xD9253D41);
+            set(Theme.key_chats_actionPressedBackground, 0xFF304C50);
+            set(Theme.key_chat_attachPhotoBackground, 0xD92B4145);
+            set(Theme.key_chat_attachGalleryBackground, 0xD92B4145);
+            set(Theme.key_chat_attachAudioBackground, 0xD92B4145);
+            set(Theme.key_chat_attachContactBackground, 0xD92B4145);
+            set(Theme.key_chat_attachContactText, 0xFFE5EFED);
+            set(Theme.key_chat_attachLocationBackground, 0xD92B4145);
+            set(Theme.key_chat_attachPollBackground, 0xD92B4145);
+            set(Theme.key_chat_searchPanelIcons, 0xFFB2C7C4);
+            set(Theme.key_chat_messagePanelVoiceBackground, 0xD92B4145);
+            set(Theme.key_chat_messagePanelVoicePressed, 0xFF58B4A8);
+            set(Theme.key_chat_serviceBackground, 0xB8233539);
+            set(Theme.key_profile_verifiedBackground, 0xFF2B827A);
+            set(Theme.key_profile_verifiedCheck, 0xFFFFFFFF);
         } else {
 
             // Shared Etleg surfaces: dialogs, lists, forms, switches and profile pages.
@@ -233,7 +253,7 @@ public final class EtlegAppearance {
             set(Theme.key_profile_title, 0xFF203437);
             set(Theme.key_profile_status, 0xFF718686);
             set(Theme.key_profile_actionIcon, 0xFF267B78);
-            set(Theme.key_profile_actionBackground, 0xDDE6F0ED);
+            set(Theme.key_profile_actionBackground, 0xCFE6F0ED);
             set(Theme.key_profile_actionPressedBackground, 0xFFD6E8E3);
             set(Theme.key_profile_tabText, 0xFF718686);
             set(Theme.key_profile_tabSelectedText, 0xFF267B78);
@@ -246,6 +266,26 @@ public final class EtlegAppearance {
             set(Theme.key_chats_menuBackground, 0xFFFFFFFF);
             set(Theme.key_chats_menuItemText, 0xFF203437);
             set(Theme.key_chats_menuItemIcon, 0xFF587875);
+            set(Theme.key_chats_archiveBackground, 0xDDEBF1EF);
+            set(Theme.key_chats_archivePinBackground, 0xFFD5E5E1);
+            set(Theme.key_chats_archiveIcon, 0xFF557774);
+            set(Theme.key_chats_archiveText, 0xFF557774);
+            set(Theme.key_chats_actionIcon, 0xFF267B78);
+            set(Theme.key_chats_actionBackground, 0xDDEBF1EF);
+            set(Theme.key_chats_actionPressedBackground, 0xFFD6E8E3);
+            set(Theme.key_chat_attachPhotoBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_attachGalleryBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_attachAudioBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_attachContactBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_attachContactText, 0xFF203437);
+            set(Theme.key_chat_attachLocationBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_attachPollBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_searchPanelIcons, 0xFF557774);
+            set(Theme.key_chat_messagePanelVoiceBackground, 0xDDEBF1EF);
+            set(Theme.key_chat_messagePanelVoicePressed, 0xFF267B78);
+            set(Theme.key_chat_serviceBackground, 0xB8FFFFFF);
+            set(Theme.key_profile_verifiedBackground, 0xFF267B78);
+            set(Theme.key_profile_verifiedCheck, 0xFFFFFFFF);
         }
     }
 
