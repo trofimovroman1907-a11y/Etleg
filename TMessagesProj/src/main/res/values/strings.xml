@@ -11666,7 +11666,7 @@
     <string name="EtlegPremium">Premium</string>
     <string name="EtlegBusiness">Business tools</string>
     <string name="EtlegHelp">Help center</string>
-    <string name="EtlegFeatures">What's new</string>
+    <string name="EtlegFeatures">What\'s new</string>
 
     <string name="EtlegTabSettings">Etleg</string>
     <string name="EtlegAutoHideDock">Auto-hide navigation</string>
