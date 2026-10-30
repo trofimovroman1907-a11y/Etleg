@@ -378,14 +378,17 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             tabsView.setBackground(tabsViewBackground);
         }
 
-        BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
-        iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
-
         fadeView = new View(context);
-        BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
-        fadeDrawable.setFadeHeight(dp(60), true);
-        fadeView.setBackground(fadeDrawable);
-
+        if (EtlegAppearance.isEtlegApp()) {
+            // Etleg uses a clean, opaque dock surface rather than Telegram's glass fade.
+            fadeView.setBackgroundColor(0x00000000);
+        } else {
+            BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
+            iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
+            BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
+            fadeDrawable.setFadeHeight(dp(60), true);
+            fadeView.setBackground(fadeDrawable);
+        }
         contentView.addView(fadeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 0, Gravity.BOTTOM));
 
         tabsViewWrapper = new FrameLayout(context);
