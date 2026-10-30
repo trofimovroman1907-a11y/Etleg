@@ -141,7 +141,7 @@ jobs:
         run: |
           APK_PATH="$(find TMessagesProj_AppStandalone/build/outputs/apk -type f -name 'app.apk' -print -quit)"
           test -n "$APK_PATH"
-          apksigner verify --verbose --print-certs "$APK_PATH" | tee "$RUNNER_TEMP/etleg-signature.txt"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK_PATH" | tee "$RUNNER_TEMP/etleg-signature.txt"
           grep -q "Etleg Preview" "$RUNNER_TEMP/etleg-signature.txt"
           if grep -q "Telegram" "$RUNNER_TEMP/etleg-signature.txt"; then
             echo "Refusing to publish an Etleg APK signed as Telegram."
