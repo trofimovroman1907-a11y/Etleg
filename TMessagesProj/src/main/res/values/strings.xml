@@ -11669,4 +11669,6 @@
     <string name="EtlegFeatures">What's new</string>
 
     <string name="EtlegTabSettings">Etleg</string>
+    <string name="EtlegAutoHideDock">Auto-hide navigation</string>
+    <string name="EtlegAutoHideDockInfo">Hide the floating dock while scrolling</string>
 </resources>
