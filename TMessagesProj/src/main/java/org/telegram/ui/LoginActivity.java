@@ -3106,9 +3106,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             settings.allow_missed_call = simcardAvailable && allowCall;
             settings.allow_app_hash = settings.allow_firebase = PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices();
             if (EtlegAppearance.isEtlegApp()) {
-                // Etleg has a different Android package and is not registered for Telegram's Firebase SMS attestation.
+                // Etleg has a different package/signing identity and must not advertise
+                // Telegram's Firebase attestation or Telegram's hard-coded SMS app hash.
                 settings.allow_firebase = false;
-                FileLog.d("Etleg: Firebase SMS challenge disabled for the unregistered custom package.");
+                settings.allow_app_hash = false;
+                FileLog.d("Etleg: Telegram Firebase attestation and SMS app hash disabled for the custom package.");
             } else if (forceDisableSafetyNet || TextUtils.isEmpty(BuildVars.SAFETYNET_KEY)) {
                 settings.allow_firebase = false;
             }
