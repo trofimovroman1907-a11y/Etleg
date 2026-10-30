@@ -69,6 +69,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
@@ -167,10 +168,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private boolean drawCommunityAvatar;
     private boolean isShareToStoryCell;
     public ShareDialogCell.RepostStoryDrawable repostStoryDrawable;
-    public int avatarStart = 11;
-    public int messagePaddingStart = 72;
-    public int heightDefault = 70;
-    public int heightThreeLines = 76;
+    public int avatarStart = 14;
+    public int messagePaddingStart = 80;
+    public int heightDefault = 80;
+    public int heightThreeLines = 92;
     public int addHeightForTags = 3;
     public int addForumHeightForTags = 11;
     public TLRPC.TL_forumTopic forumTopic;
@@ -646,6 +647,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private boolean isSelected;
 
     private RectF rect = new RectF();
+    private final RectF etlegCardRect = new RectF();
+    private final Paint etlegCardPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private DialogsAdapter.DialogsPreloader preloader;
     private Path counterPath;
     private RectF counterPathRect;
@@ -2428,8 +2431,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         int avatarTop;
         int thumbLeft;
         if (useForceThreeLines || SharedConfig.useThreeLinesLayout) {
-            avatarTop = dp(11);
-            messageNameTop = dp(32);
+            avatarTop = dp(17);
+            messageNameTop = dp(35);
             timeTop = dp(13);
             errorTop = dp(42.33f);
             pinTop = dp(43);
@@ -2451,8 +2454,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + dp(31) + (twoLinesForName ? dp(20) : 0) - (!(useForceThreeLines || SharedConfig.useThreeLinesLayout) && tags != null && !tags.isEmpty() ? dp(9) : 0), dp(18), dp(18));
             }
         } else {
-            avatarTop = dp(9);
-            messageNameTop = dp(31);
+            avatarTop = dp(14);
+            messageNameTop = dp(33);
             timeTop = dp(16);
             errorTop = dp(38);
             pinTop = dp(39);
@@ -4024,7 +4027,14 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             gtx += translationX;
         }
 
-        float cornersRadius = dp(8) * cornerProgress;
+        if (EtlegAppearance.isEtlegApp()) {
+            float cardInset = dp(7);
+            etlegCardRect.set(cardInset, dp(3), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(3));
+            etlegCardPaint.setColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
+            canvas.drawRoundRect(etlegCardRect, dp(EtlegAppearance.getDialogCardRadiusDp()), dp(EtlegAppearance.getDialogCardRadiusDp()), etlegCardPaint);
+        }
+
+        float cornersRadius = dp(EtlegAppearance.isEtlegApp() ? 16 : 8) * cornerProgress;
         if (isSelected) {
             rect.set(0, 0, getMeasuredWidth(), AndroidUtilities.lerp(getMeasuredHeight(), getCollapsedHeight(), rightFragmentOpenedProgress));
             rect.offset(0, -translateY + collapseOffset);

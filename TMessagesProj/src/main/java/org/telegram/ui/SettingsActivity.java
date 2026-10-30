@@ -71,6 +71,7 @@ import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatThemeController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
@@ -233,6 +234,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
     @Override
     public View createView(Context context) {
+        EtlegAppearance.applyTheme();
         contentView = new SizeNotifierFrameLayout(context) {
             @Override
             protected void dispatchDraw(Canvas canvas) {
@@ -298,7 +300,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         leftButtonIsBack = true; // the view may be rebuilt (theme, language): checkUi_menuItems swaps it to QR again
         actionBar.setAllowOverlayTitle(true);
         actionBar.setUseContainerForTitles();
-        actionBar.setTitle(getString(R.string.Settings));
+        if (EtlegAppearance.isEtlegApp() && hasMainTabs) {
+            actionBar.setTitle("Etleg");
+            actionBar.setSubtitle(getString(R.string.Settings));
+        } else {
+            actionBar.setTitle(getString(R.string.Settings));
+        }
         actionBar.setAdditionalTextLeft(-dp(4));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override

@@ -129,6 +129,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.CallReceiver;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
@@ -1711,13 +1712,21 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             if (response != null && !(((TLRPC.auth_SentCode) response).type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms)) {
                 AndroidUtilities.runOnUIThread(() -> fillNextCodeParams(params, (TLRPC.auth_SentCode) response));
             } else {
+                if (error != null) {
+                    FileLog.e("Etleg code delivery fallback failed: " + error.text);
+                } else {
+                    FileLog.d("Etleg code delivery fallback returned no supported alternative.");
+                }
+                final String fallbackError = error != null && error.text != null && error.text.length() > 0
+                        ? error.text
+                        : getString(R.string.SafetyNetErrorOccurred);
                 AndroidUtilities.runOnUIThread(() -> {
                     if (getParentActivity() == null || getParentActivity().isFinishing() || getContext() == null) {
                         return;
                     }
                     new AlertDialog.Builder(getContext())
-                            .setTitle(getString(R.string.RestorePasswordNoEmailTitle))
-                            .setMessage(getString(R.string.SafetyNetErrorOccurred))
+                            .setTitle(getString(R.string.AppName))
+                            .setMessage(fallbackError)
                             .setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                                 forceDisableSafetyNet = true;
                                 if (currentViewNum != VIEW_PHONE_INPUT) {
@@ -1768,6 +1777,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             return;
         }
         if (res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms && !res.type.verifiedFirebase && !isRequestingFirebaseSms) {
+            if (EtlegAppearance.isEtlegApp()) {
+                FileLog.d("Etleg custom package: requesting a server-supported code delivery method instead of Firebase SMS attestation");
+                needShowProgress(0);
+                isRequestingFirebaseSms = true;
+                resendCodeFromSafetyNet(params, res, "ETLEG_CUSTOM_PACKAGE_FALLBACK");
+                return;
+            }
             if (PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices()) {
                 TLRPC.TL_auth_sentCodeTypeFirebaseSms r = (TLRPC.TL_auth_sentCodeTypeFirebaseSms) res.type;
                 needShowProgress(0);
@@ -3081,7 +3097,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             settings.allow_flashcall = simcardAvailable && allowCall && allowCancelCall && allowReadCallLog;
             settings.allow_missed_call = simcardAvailable && allowCall;
             settings.allow_app_hash = settings.allow_firebase = PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices();
-            if (forceDisableSafetyNet || TextUtils.isEmpty(BuildVars.SAFETYNET_KEY)) {
+            if (EtlegAppearance.isEtlegApp()) {
+                // Etleg has a different Android package and is not registered for Telegram's Firebase SMS attestation.
+                settings.allow_firebase = false;
+                FileLog.d("Etleg: Firebase SMS challenge disabled for the unregistered custom package.");
+            } else if (forceDisableSafetyNet || TextUtils.isEmpty(BuildVars.SAFETYNET_KEY)) {
                 settings.allow_firebase = false;
             }
 
