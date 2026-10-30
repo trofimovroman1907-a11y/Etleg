@@ -25,7 +25,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 
 /** Etleg's own interface controls. No stock Telegram theme-page redirects. */
-public class EtlegSettingsActivity extends BaseFragment {
+public class EtlegSettingsActivity extends BaseFragment implements MainTabsActivity.TabFragmentDelegate {
     private LinearLayout content;
     private boolean hasMainTabs;
     private int cardColor;
