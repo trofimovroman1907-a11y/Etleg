@@ -77,6 +77,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
                         EtlegPreferences.isCompactChatList(), value -> EtlegPreferences.setCompactChatList(context, value)));
         addSwitchRow(context, new SettingRow(R.drawable.etleg_ic_labels, R.string.EtlegTabLabels, R.string.EtlegTabLabelsInfo,
                 EtlegPreferences.isTabLabelsEnabled(), value -> EtlegPreferences.setTabLabelsEnabled(context, value)));
+        addSwitchRow(context, new SettingRow(R.drawable.etleg_ic_dock, R.string.EtlegAutoHideDock, R.string.EtlegAutoHideDockInfo,
+                EtlegPreferences.isAutoHideDockEnabled(), value -> EtlegPreferences.setAutoHideDockEnabled(context, value)));
         addSwitchRow(context, new SettingRow(R.drawable.etleg_ic_motion, R.string.EtlegReducedMotion, R.string.EtlegReducedMotionInfo,
                 EtlegPreferences.isReducedMotion(), value -> EtlegPreferences.setReducedMotion(context, value)));
 
