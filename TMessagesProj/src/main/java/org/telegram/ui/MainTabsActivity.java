@@ -312,9 +312,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         tabsView = new MainTabsLayout(context, resourceProvider);
         tabsView.setClipChildren(false);
-        final int dockInset = EtlegAppearance.isEtlegApp() ? 10 : DialogsActivity.MAIN_TABS_MARGIN + 4;
+        final int dockInset = EtlegAppearance.isEtlegApp() ? 12 : DialogsActivity.MAIN_TABS_MARGIN + 4;
         tabsView.setPadding(dp(dockInset), dp(dockInset), dp(dockInset), dp(dockInset));
-        tabsView.setMaxWidth(dp((EtlegAppearance.isEtlegApp() ? 344 : 328) + DialogsActivity.MAIN_TABS_MARGIN * 2));
+        tabsView.setMaxWidth(dp((EtlegAppearance.isEtlegApp() ? 360 : 328) + DialogsActivity.MAIN_TABS_MARGIN * 2));
 
         tabs = new GlassTabView[TABS_COUNT];
         tabs[INDEX_CHATS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats);
@@ -373,10 +373,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
 
         tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
-        tabsViewBackground.setRadius(dp(28));
-        tabsViewBackground.setPadding(dp(1.25f));
+        tabsViewBackground.setRadius(dp(32));
+        tabsViewBackground.setPadding(dp(1.5f));
         tabsView.setBackground(tabsViewBackground);
-        tabsView.setElevation(dp(14));
+        tabsView.setElevation(dp(18));
 
         fadeView = new View(context);
         BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
