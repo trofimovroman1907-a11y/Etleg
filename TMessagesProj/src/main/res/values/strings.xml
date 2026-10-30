@@ -11643,4 +11643,19 @@
     <string name="NoPaidMessagesTokenUsed">un1 used your QR code and can message you for free</string>
     <string name="NoPaidMessagesTokenUsedOut">You used the QR code of un1 and can message them for free</string>
     <string name="NoPaidMessagesTokenImported">You can now message **%1$s** for free.</string>
+
+    <string name="EtlegSettingsSubtitle">Your space, your rules</string>
+    <string name="EtlegInterfaceSection">Interface</string>
+    <string name="EtlegCompactChats">Compact chat list</string>
+    <string name="EtlegCompactChatsInfo">Fit more conversations on screen</string>
+    <string name="EtlegTabLabels">Navigation labels</string>
+    <string name="EtlegTabLabelsInfo">Show names below navigation icons</string>
+    <string name="EtlegReducedMotion">Reduced motion</string>
+    <string name="EtlegReducedMotionInfo">Use shorter, calmer transitions</string>
+    <string name="EtlegInteractionSection">Interaction</string>
+    <string name="EtlegHaptics">Touch feedback</string>
+    <string name="EtlegHapticsInfo">Subtle vibration on navigation taps</string>
+    <string name="EtlegAboutSection">About Etleg</string>
+    <string name="EtlegAboutText">An unofficial Telegram-based client. Messaging and calls continue to use Telegram services.</string>
+
 </resources>
