@@ -81,7 +81,7 @@ public final class EtlegAppearance {
             set(Theme.key_glass_defaultIcon, 0xFFB2C7C4);
             set(Theme.key_glass_defaultText, 0xFFB2C7C4);
             set(Theme.key_glass_tabSelected, 0xFF2B7772);
-            set(Theme.key_glass_tabSelectedText, 0xEFFFFFFF);
+            set(Theme.key_glass_tabSelectedText, 0xFFFFFFFF);
             set(Theme.key_glass_tabUnselected, 0xFF9DB3B0);
             set(Theme.key_telegram_color_dialogsLogo, 0xFF77C8BD);
             set(Theme.key_telegram_color, 0xFF2B827A);
@@ -108,7 +108,7 @@ public final class EtlegAppearance {
 
             set(Theme.key_chats_name, 0xFF203437);
             set(Theme.key_chats_message, 0xFF728785);
-            set(Theme.key_chat_inBubble, 0xEFFFFFFF);
+            set(Theme.key_chat_inBubble, 0xFFFFFFFF);
             set(Theme.key_chat_inBubbleSelected, 0xFFE6F1EF);
             set(Theme.key_chat_inBubbleShadow, 0x140D3435);
             set(Theme.key_chat_outBubble, 0xFFD6ECE6);
@@ -129,7 +129,7 @@ public final class EtlegAppearance {
             set(Theme.key_glass_defaultIcon, 0xFF557774);
             set(Theme.key_glass_defaultText, 0xFF557774);
             set(Theme.key_glass_tabSelected, 0xFF267B78);
-            set(Theme.key_glass_tabSelectedText, 0xEFFFFFFF);
+            set(Theme.key_glass_tabSelectedText, 0xFFFFFFFF);
             set(Theme.key_glass_tabUnselected, 0xFF587875);
             set(Theme.key_telegram_color_dialogsLogo, 0xFF267B78);
             set(Theme.key_telegram_color, 0xFF267B78);
@@ -156,7 +156,7 @@ public final class EtlegAppearance {
             set(Theme.key_dialogSearchText, 0xFFE5EFED);
             set(Theme.key_dialogFloatingButton, 0xFF2B827A);
             set(Theme.key_dialogFloatingButtonPressed, 0xFF246F69);
-            set(Theme.key_dialogFloatingIcon, 0xEFFFFFFF);
+            set(Theme.key_dialogFloatingIcon, 0xFFFFFFFF);
             set(Theme.key_windowBackgroundWhiteInputField, 0xFF263B3F);
             set(Theme.key_windowBackgroundWhiteInputFieldActivated, 0xFF58B4A8);
             set(Theme.key_windowBackgroundWhiteHintText, 0xFF829A98);
@@ -172,7 +172,7 @@ public final class EtlegAppearance {
             set(Theme.key_switchTrackBlue, 0xFF40585B);
             set(Theme.key_switchTrackBlueChecked, 0xFF2B827A);
             set(Theme.key_checkbox, 0xFF2B827A);
-            set(Theme.key_checkboxCheck, 0xEFFFFFFF);
+            set(Theme.key_checkboxCheck, 0xFFFFFFFF);
             set(Theme.key_radioBackground, 0xFF40585B);
             set(Theme.key_radioBackgroundChecked, 0xFF58B4A8);
             set(Theme.key_profile_title, 0xFFE5EFED);
@@ -184,7 +184,7 @@ public final class EtlegAppearance {
             set(Theme.key_profile_tabSelectedText, 0xFF83D2C7);
             set(Theme.key_profile_tabSelectedLine, 0xFF58B4A8);
             set(Theme.key_chats_unreadCounter, 0xFF2B827A);
-            set(Theme.key_chats_unreadCounterText, 0xEFFFFFFF);
+            set(Theme.key_chats_unreadCounterText, 0xFFFFFFFF);
             set(Theme.key_chats_date, 0xFF829A98);
             set(Theme.key_chats_draft, 0xFFFF9B8E);
             set(Theme.key_chats_sentReadCheck, 0xFF70C7BB);
@@ -211,7 +211,7 @@ public final class EtlegAppearance {
             set(Theme.key_dialogSearchText, 0xFF203437);
             set(Theme.key_dialogFloatingButton, 0xFF267B78);
             set(Theme.key_dialogFloatingButtonPressed, 0xFF1D6663);
-            set(Theme.key_dialogFloatingIcon, 0xEFFFFFFF);
+            set(Theme.key_dialogFloatingIcon, 0xFFFFFFFF);
             set(Theme.key_windowBackgroundWhiteInputField, 0xDDEBF1EF);
             set(Theme.key_windowBackgroundWhiteInputFieldActivated, 0xFF267B78);
             set(Theme.key_windowBackgroundWhiteHintText, 0xFF8A9B99);
@@ -227,7 +227,7 @@ public final class EtlegAppearance {
             set(Theme.key_switchTrackBlue, 0xFFCCD9D6);
             set(Theme.key_switchTrackBlueChecked, 0xFF267B78);
             set(Theme.key_checkbox, 0xFF267B78);
-            set(Theme.key_checkboxCheck, 0xEFFFFFFF);
+            set(Theme.key_checkboxCheck, 0xFFFFFFFF);
             set(Theme.key_radioBackground, 0xFFCCD9D6);
             set(Theme.key_radioBackgroundChecked, 0xFF267B78);
             set(Theme.key_profile_title, 0xFF203437);
@@ -239,11 +239,11 @@ public final class EtlegAppearance {
             set(Theme.key_profile_tabSelectedText, 0xFF267B78);
             set(Theme.key_profile_tabSelectedLine, 0xFF267B78);
             set(Theme.key_chats_unreadCounter, 0xFF267B78);
-            set(Theme.key_chats_unreadCounterText, 0xEFFFFFFF);
+            set(Theme.key_chats_unreadCounterText, 0xFFFFFFFF);
             set(Theme.key_chats_date, 0xFF8A9B99);
             set(Theme.key_chats_draft, 0xFFB65B50);
             set(Theme.key_chats_sentReadCheck, 0xFF267B78);
-            set(Theme.key_chats_menuBackground, 0xEFFFFFFF);
+            set(Theme.key_chats_menuBackground, 0xFFFFFFFF);
             set(Theme.key_chats_menuItemText, 0xFF203437);
             set(Theme.key_chats_menuItemIcon, 0xFF587875);
         }
