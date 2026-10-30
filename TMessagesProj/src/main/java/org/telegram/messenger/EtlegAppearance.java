@@ -35,6 +35,7 @@ public final class EtlegAppearance {
             return;
         }
 
+        SharedConfig.bubbleRadius = getMessageBubbleRadiusDp();
         final boolean dark = Theme.isCurrentThemeDark();
 
         if (dark) {
