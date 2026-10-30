@@ -710,6 +710,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
         useForceThreeLines = forceThreeLines;
         currentAccount = account;
+        if (EtlegAppearance.isEtlegApp()) {
+            // Give Etleg's conversation list a roomier, card-oriented rhythm.
+            avatarStart = 16;
+            messagePaddingStart = 84;
+            heightDefault = 88;
+            heightThreeLines = 100;
+            addHeightForTags = 6;
+            addForumHeightForTags = 12;
+            chekBoxPaddingTop = 46;
+        }
 
         emojiStatusView = new View(context) {
             @Override
@@ -1012,7 +1022,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private int computeHeight() {
         int height;
         if (isForumCell() && !isTransitionSupport && !collapsed) {
-            height = dp(getEtlegChatRowHeight(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91));
+            height = dp(getEtlegChatRowHeight(EtlegAppearance.isEtlegApp()
+                    ? (useForceThreeLines || SharedConfig.useThreeLinesLayout ? 98 : 104)
+                    : (useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91)));
             if (useSeparator) {
                 height += 1;
             }
