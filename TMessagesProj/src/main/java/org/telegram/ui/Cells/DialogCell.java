@@ -61,6 +61,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
@@ -170,8 +171,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     public ShareDialogCell.RepostStoryDrawable repostStoryDrawable;
     public int avatarStart = 14;
     public int messagePaddingStart = 80;
-    public int heightDefault = 80;
-    public int heightThreeLines = 92;
+    public int heightDefault = EtlegPreferences.getChatRowHeight(80);
+    public int heightThreeLines = EtlegPreferences.getChatRowHeight(92);
     public int addHeightForTags = 3;
     public int addForumHeightForTags = 11;
     public TLRPC.TL_forumTopic forumTopic;
