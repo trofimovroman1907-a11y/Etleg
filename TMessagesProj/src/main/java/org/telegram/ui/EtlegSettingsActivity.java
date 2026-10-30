@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -26,10 +27,26 @@ import org.telegram.ui.Components.LayoutHelper;
 /** Etleg's own interface controls. No stock Telegram theme-page redirects. */
 public class EtlegSettingsActivity extends BaseFragment {
     private LinearLayout content;
+    private boolean hasMainTabs;
     private int cardColor;
     private int textColor;
     private int secondaryColor;
     private int accentColor;
+
+    public EtlegSettingsActivity() {
+        this(null);
+    }
+
+    public EtlegSettingsActivity(Bundle args) {
+        super(args);
+    }
+
+    @Override
+    public boolean onFragmentCreate() {
+        hasMainTabs = arguments != null && arguments.getBoolean("hasMainTabs", false);
+        additionNavigationBarHeight = hasMainTabs ? AndroidUtilities.dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
+        return super.onFragmentCreate();
+    }
 
     @Override
     public View createView(Context context) {
@@ -66,6 +83,11 @@ public class EtlegSettingsActivity extends BaseFragment {
         addSection(context, R.string.EtlegInteractionSection);
         addSwitchCard(context, new SettingRow(R.drawable.etleg_ic_haptic, R.string.EtlegHaptics, R.string.EtlegHapticsInfo,
                 EtlegPreferences.isHapticEnabled(), value -> EtlegPreferences.setHapticEnabled(context, value)));
+
+        addSection(context, R.string.EtlegAccountSection);
+        addActionCard(context, R.drawable.etleg_ic_account, R.string.EtlegProfile, () -> presentFragment(new UserInfoActivity()));
+        addActionRow(context, R.drawable.etleg_ic_devices, R.string.EtlegDevices, () -> presentFragment(new SessionsActivity(0)));
+        addActionRow(context, R.drawable.etleg_ic_privacy, R.string.EtlegPrivacy, () -> presentFragment(new PrivacySettingsActivity()));
 
         addSection(context, R.string.EtlegAboutSection);
         addAboutCard(context);
@@ -206,6 +228,50 @@ public class EtlegSettingsActivity extends BaseFragment {
         toggle.setOnCheckedChangeListener((button, checked) -> row.action.onChanged(checked));
         line.addView(toggle, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 8, 0, 0, 0));
         line.setBackground(Theme.getSelectorDrawable(true));
+        card.addView(line, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+    }
+
+
+    private void addActionCard(Context context, int iconRes, int titleRes, Runnable action) {
+        LinearLayout card = new LinearLayout(context);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+        addActionRow(context, iconRes, titleRes, action, card);
+        content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
+    }
+
+    private void addActionRow(Context context, int iconRes, int titleRes, Runnable action) {
+        View previous = content.getChildAt(content.getChildCount() - 1);
+        if (!(previous instanceof LinearLayout) || ((LinearLayout) previous).getChildCount() == 0) {
+            addActionCard(context, iconRes, titleRes, action);
+            return;
+        }
+        addActionRow(context, iconRes, titleRes, action, (LinearLayout) previous);
+    }
+
+    private void addActionRow(Context context, int iconRes, int titleRes, Runnable action, LinearLayout card) {
+        LinearLayout line = new LinearLayout(context);
+        line.setGravity(Gravity.CENTER_VERTICAL);
+        line.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(12), AndroidUtilities.dp(16), AndroidUtilities.dp(12));
+        ImageView icon = new ImageView(context);
+        icon.setImageResource(iconRes);
+        icon.setColorFilter(accentColor);
+        icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(13), Theme.multAlpha(accentColor, 0.12f)));
+        icon.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
+        line.addView(icon, LayoutHelper.createLinear(42, 42, Gravity.CENTER_VERTICAL, 0, 0, 13, 0));
+        TextView title = new TextView(context);
+        title.setText(LocaleController.getString(titleRes));
+        title.setTextColor(textColor);
+        title.setTextSize(15);
+        title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        line.addView(title, new LinearLayout.LayoutParams(0, LayoutHelper.WRAP_CONTENT, 1f));
+        TextView arrow = new TextView(context);
+        arrow.setText("›");
+        arrow.setTextSize(25);
+        arrow.setTextColor(secondaryColor);
+        line.addView(arrow, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
+        line.setBackground(Theme.getSelectorDrawable(true));
+        line.setOnClickListener(v -> action.run());
         card.addView(line, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
