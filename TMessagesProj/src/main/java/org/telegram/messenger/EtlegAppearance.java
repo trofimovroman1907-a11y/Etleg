@@ -41,11 +41,11 @@ public final class EtlegAppearance {
         if (dark) {
             set(Theme.key_windowBackgroundWhite, 0xFF111E21);
             set(Theme.key_windowBackgroundGray, 0xFF0C171A);
-            set(Theme.key_windowBackgroundGrayShadow, 0x33000000);
-            set(Theme.key_dialogBackground, 0xE6253539);
-            set(Theme.key_dialogBackgroundGray, 0xD92B4145);
+            set(Theme.key_windowBackgroundGrayShadow, 0x3A000000);
+            set(Theme.key_dialogBackground, 0xD9253539);
+            set(Theme.key_dialogBackgroundGray, 0xC92B4145);
 
-            set(Theme.key_actionBarDefault, 0xD91A3438);
+            set(Theme.key_actionBarDefault, 0xCC1A3438);
             set(Theme.key_actionBarDefaultIcon, 0xFFE8F2F0);
             set(Theme.key_actionBarDefaultTitle, 0xFFE8F2F0);
             set(Theme.key_actionBarDefaultSubtitle, 0xFF9EB6B4);
@@ -68,7 +68,7 @@ public final class EtlegAppearance {
             set(Theme.key_chat_outBubbleShadow, 0x22000000);
             set(Theme.key_chat_messageTextIn, 0xFFE8F1EF);
             set(Theme.key_chat_messageTextOut, 0xFFEAF6F3);
-            set(Theme.key_chat_messagePanelBackground, 0xD91C3337);
+            set(Theme.key_chat_messagePanelBackground, 0xCC1C3337);
             set(Theme.key_chat_messagePanelShadow, 0x22000000);
             set(Theme.key_chat_messagePanelText, 0xFFE7F1EF);
             set(Theme.key_chat_messagePanelHint, 0xFF8DA5A2);
@@ -90,8 +90,8 @@ public final class EtlegAppearance {
             set(Theme.key_windowBackgroundWhite, 0xFFF0F5F4);
             set(Theme.key_windowBackgroundGray, 0xFFE7EFED);
             set(Theme.key_windowBackgroundGrayShadow, 0x160D3435);
-            set(Theme.key_dialogBackground, 0xEFFFFFFF);
-            set(Theme.key_dialogBackgroundGray, 0xEAFBFCFC);
+            set(Theme.key_dialogBackground, 0xE6FFFFFF);
+            set(Theme.key_dialogBackgroundGray, 0xDDFBFCFC);
 
             set(Theme.key_actionBarDefault, 0xFF17464A);
             set(Theme.key_actionBarDefaultIcon, 0xFFF4FAF8);
@@ -116,7 +116,7 @@ public final class EtlegAppearance {
             set(Theme.key_chat_outBubbleShadow, 0x140D3435);
             set(Theme.key_chat_messageTextIn, 0xFF203437);
             set(Theme.key_chat_messageTextOut, 0xFF183D3A);
-            set(Theme.key_chat_messagePanelBackground, 0xE8FFFFFF);
+            set(Theme.key_chat_messagePanelBackground, 0xDDFFFFFF);
             set(Theme.key_chat_messagePanelShadow, 0x160D3435);
             set(Theme.key_chat_messagePanelText, 0xFF203437);
             set(Theme.key_chat_messagePanelHint, 0xFF8A9B99);
