@@ -1,0 +1,80 @@
+name: Etleg Android Preview
+
+on:
+  pull_request:
+    branches:
+      - etleg-account-isolation
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etleg-android-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Install Android build tools
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
+          yes | sdkmanager --licenses
+
+      - name: Build Etleg debug APK
+        run: |
+          chmod +x gradlew
+          # Keep preview builds focused on modern 64-bit Android devices.
+          python3 - <<'PY'
+          from pathlib import Path
+          build_file = Path("TMessagesProj_AppStandalone/build.gradle")
+          source = build_file.read_text()
+          full_abi_list = 'abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"'
+          arm64_only = 'abiFilters "arm64-v8a"'
+          google_services_plugin = "apply plugin: 'com.google.gms.google-services'"
+          if source.count(full_abi_list) != 1:
+              raise SystemExit("Expected standalone ABI filter was not found exactly once.")
+          if source.count(google_services_plugin) != 1:
+              raise SystemExit("Expected standalone Google Services plugin was not found exactly once.")
+          source = source.replace(full_abi_list, arm64_only)
+          # Do not attach Telegram's Firebase identity to the Etleg preview.
+          # Removing the plugin from this temporary runner copy also avoids
+          # Gradle's generated-resource task dependency; push is not validated.
+          source = source.replace(
+              google_services_plugin,
+              "// Google Services disabled for the Etleg preview build."
+          )
+          build_file.write_text(source)
+          PY
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
+            --no-daemon --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: Etleg-Android-Preview-arm64
+          path: TMessagesProj_AppStandalone/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 7

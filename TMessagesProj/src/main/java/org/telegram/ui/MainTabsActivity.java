@@ -1154,8 +1154,18 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         iBlur3SourceTabGlass.updateDisplayListIfNeeded();
     }
 
+    private boolean iBlur3FadeColorInitialized;
+    private int iBlur3FadeColor;
+
     private void blur3_updateFadeColors() {
-        iBlur3SourceColor.setColor(getEstBackgroundColor());
+        final int color = getEstBackgroundColor();
+        if (iBlur3FadeColorInitialized && iBlur3FadeColor == color) {
+            return;
+        }
+
+        iBlur3FadeColorInitialized = true;
+        iBlur3FadeColor = color;
+        iBlur3SourceColor.setColor(color);
         if (fadeView != null) {
             fadeView.invalidate();
         }
