@@ -66,7 +66,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         scroll.setClipToPadding(false);
         content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(16), AndroidUtilities.dp(18), AndroidUtilities.dp(28));
+        content.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(14), AndroidUtilities.dp(16), AndroidUtilities.dp(24));
         scroll.addView(content, new ScrollView.LayoutParams(-1, -2));
         fragmentView = scroll;
 
@@ -122,7 +122,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         background.setShape(GradientDrawable.RECTANGLE);
         background.setCornerRadius(AndroidUtilities.dp(radiusDp));
         background.setColor(Theme.multAlpha(cardColor, opacity));
-        int outline = Theme.isCurrentThemeDark() ? 0x28D8F0EC : 0xA6FFFFFF;
+        int outline = Theme.isCurrentThemeDark() ? 0x40D8F0EC : 0xB8FFFFFF;
         background.setStroke(AndroidUtilities.dp(1), outline);
         return background;
     }
@@ -138,9 +138,9 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         LinearLayout hero = new LinearLayout(context);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER_VERTICAL);
-        hero.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20));
-        hero.setBackground(createGlassCard(context, 28, 0.88f));
-        hero.setElevation(AndroidUtilities.dp(5));
+        hero.setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(18), AndroidUtilities.dp(18), AndroidUtilities.dp(18));
+        hero.setBackground(createGlassCard(context, 26, 0.80f));
+        hero.setElevation(AndroidUtilities.dp(4));
 
         LinearLayout identity = new LinearLayout(context);
         identity.setGravity(Gravity.CENTER_VERTICAL);
@@ -150,10 +150,10 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         monogram.setText("E");
         monogram.setGravity(Gravity.CENTER);
         monogram.setTextColor(0xFFFFFFFF);
-        monogram.setTextSize(24);
+        monogram.setTextSize(22);
         monogram.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        monogram.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(19), accentColor));
-        identity.addView(monogram, LayoutHelper.createLinear(58, 58, Gravity.CENTER_VERTICAL, 0, 0, 15, 0));
+        monogram.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(17), accentColor));
+        identity.addView(monogram, LayoutHelper.createLinear(52, 52, Gravity.CENTER_VERTICAL, 0, 0, 12, 0));
 
         LinearLayout identityLabels = new LinearLayout(context);
         identityLabels.setOrientation(LinearLayout.VERTICAL);
@@ -162,7 +162,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         TextView brand = new TextView(context);
         brand.setText("Etleg");
         brand.setTextColor(textColor);
-        brand.setTextSize(30);
+        brand.setTextSize(28);
         brand.setLetterSpacing(-0.025f);
         brand.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         identityLabels.addView(brand, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -170,7 +170,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         TextView subtitle = new TextView(context);
         subtitle.setText(LocaleController.getString(R.string.EtlegSettingsSubtitle));
         subtitle.setTextColor(secondaryColor);
-        subtitle.setTextSize(14);
+        subtitle.setTextSize(13);
         subtitle.setPadding(0, AndroidUtilities.dp(3), 0, 0);
         identityLabels.addView(subtitle, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         identity.addView(identityLabels, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
@@ -185,15 +185,15 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         title.setTextSize(12);
         title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         title.setLetterSpacing(0.07f);
-        title.setPadding(AndroidUtilities.dp(5), AndroidUtilities.dp(8), AndroidUtilities.dp(5), AndroidUtilities.dp(8));
+        title.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(6), AndroidUtilities.dp(4), AndroidUtilities.dp(6));
         content.addView(title, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 4));
     }
 
     private void addSwitchCard(Context context, SettingRow row) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(createGlassCard(context, 24, 0.90f));
-        card.setElevation(AndroidUtilities.dp(4));
+        card.setBackground(createGlassCard(context, 22, 0.82f));
+        card.setElevation(AndroidUtilities.dp(3));
         addSwitchRow(context, row, card);
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
     }
@@ -203,8 +203,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         if (content.getChildCount() == 0 || !(content.getChildAt(content.getChildCount() - 1) instanceof LinearLayout)) {
             card = new LinearLayout(context);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackground(createGlassCard(context, 24, Theme.isCurrentThemeDark() ? 0.90f : 0.84f));
-            card.setElevation(AndroidUtilities.dp(4));
+            card.setBackground(createGlassCard(context, 22, Theme.isCurrentThemeDark() ? 0.82f : 0.76f));
+            card.setElevation(AndroidUtilities.dp(3));
             content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
         } else {
             View previous = content.getChildAt(content.getChildCount() - 1);
@@ -215,8 +215,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         if (card == null) {
             card = new LinearLayout(context);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackground(createGlassCard(context, 24, Theme.isCurrentThemeDark() ? 0.90f : 0.84f));
-        card.setElevation(AndroidUtilities.dp(4));
+            card.setBackground(createGlassCard(context, 22, Theme.isCurrentThemeDark() ? 0.82f : 0.76f));
+        card.setElevation(AndroidUtilities.dp(3));
             content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
         }
         addSwitchRow(context, row, card);
@@ -226,14 +226,14 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         LinearLayout line = new LinearLayout(context);
         line.setGravity(Gravity.CENTER_VERTICAL);
         line.setOrientation(LinearLayout.HORIZONTAL);
-        line.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(15), AndroidUtilities.dp(14), AndroidUtilities.dp(15));
+        line.setPadding(AndroidUtilities.dp(14), AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12));
 
         ImageView icon = new ImageView(context);
         icon.setImageResource(row.icon);
         icon.setColorFilter(accentColor);
-        icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(13), Theme.multAlpha(accentColor, 0.12f)));
-        icon.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
-        line.addView(icon, LayoutHelper.createLinear(44, 44, Gravity.CENTER_VERTICAL, 0, 0, 13, 0));
+        icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), Theme.multAlpha(accentColor, 0.12f)));
+        icon.setPadding(AndroidUtilities.dp(9), AndroidUtilities.dp(9), AndroidUtilities.dp(9), AndroidUtilities.dp(9));
+        line.addView(icon, LayoutHelper.createLinear(40, 40, Gravity.CENTER_VERTICAL, 0, 0, 11, 0));
 
         LinearLayout labels = new LinearLayout(context);
         labels.setOrientation(LinearLayout.VERTICAL);
@@ -241,7 +241,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         TextView title = new TextView(context);
         title.setText(LocaleController.getString(row.title));
         title.setTextColor(textColor);
-        title.setTextSize(15);
+        title.setTextSize(14);
         title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         labels.addView(title, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -277,7 +277,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addActionCard(Context context, int iconRes, int titleRes, Runnable action) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(createGlassCard(context, 24, Theme.isCurrentThemeDark() ? 0.90f : 0.84f));
+        card.setBackground(createGlassCard(context, 22, Theme.isCurrentThemeDark() ? 0.82f : 0.76f));
             card.setElevation(AndroidUtilities.dp(2));
         addActionRow(context, iconRes, titleRes, action, card);
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
@@ -295,13 +295,13 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addActionRow(Context context, int iconRes, int titleRes, Runnable action, LinearLayout card) {
         LinearLayout line = new LinearLayout(context);
         line.setGravity(Gravity.CENTER_VERTICAL);
-        line.setPadding(AndroidUtilities.dp(14), AndroidUtilities.dp(9), AndroidUtilities.dp(14), AndroidUtilities.dp(9));
+        line.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(8), AndroidUtilities.dp(12), AndroidUtilities.dp(8));
         ImageView icon = new ImageView(context);
         icon.setImageResource(iconRes);
         icon.setColorFilter(accentColor);
-        icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(13), Theme.multAlpha(accentColor, 0.12f)));
-        icon.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
-        line.addView(icon, LayoutHelper.createLinear(36, 36, Gravity.CENTER_VERTICAL, 0, 0, 11, 0));
+        icon.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(12), Theme.multAlpha(accentColor, 0.12f)));
+        icon.setPadding(AndroidUtilities.dp(7), AndroidUtilities.dp(7), AndroidUtilities.dp(7), AndroidUtilities.dp(7));
+        line.addView(icon, LayoutHelper.createLinear(34, 34, Gravity.CENTER_VERTICAL, 0, 0, 10, 0));
         TextView title = new TextView(context);
         title.setText(LocaleController.getString(titleRes));
         title.setTextColor(textColor);
@@ -329,8 +329,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         about.setTextColor(secondaryColor);
         about.setTextSize(13);
         about.setLineSpacing(AndroidUtilities.dp(3), 1f);
-        about.setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(17), AndroidUtilities.dp(18), AndroidUtilities.dp(17));
-        about.setBackground(createGlassCard(context, 24, 0.90f));
+        about.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(14), AndroidUtilities.dp(16), AndroidUtilities.dp(14));
+        about.setBackground(createGlassCard(context, 22, 0.82f));
         about.setElevation(AndroidUtilities.dp(4));
         content.addView(about, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
