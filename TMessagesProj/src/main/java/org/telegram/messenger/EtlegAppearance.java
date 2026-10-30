@@ -295,10 +295,10 @@ public final class EtlegAppearance {
     }
 
     public static int getMessageBubbleRadiusDp() {
-        return 21;
+        return 23;
     }
 
     public static int getDialogCardRadiusDp() {
-        return 18;
+        return 21;
     }
 }
