@@ -329,7 +329,6 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         tabsView.addTabToIgnoreClick(tabs[INDEX_CHATS]);
         tabsView.addTabToIgnoreClick(tabs[INDEX_CONTACTS]);
         tabsView.addTabToIgnoreClick(tabs[INDEX_SETTINGS]);
-        tabsView.addTabToIgnoreClick(tabs[INDEX_CALLS]);
 
         for (int index = 0; index < tabs.length; index++) {
             final GlassTabView view = tabs[index];
@@ -353,8 +352,12 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
                 viewPager.scrollToPosition(position);
             });
 
-            tabsView.addView(tabs[index]);
-            tabsView.setViewVisible(view, true, false);
+            // Etleg removes the standalone Calls button from the dock while keeping
+            // the internal pager position and call log fragment intact for compatibility.
+            if (!EtlegAppearance.isEtlegApp() || index != INDEX_CALLS) {
+                tabsView.addView(tabs[index]);
+                tabsView.setViewVisible(view, true, false);
+            }
         }
 
         selectTab(viewPager.getCurrentPosition(), false);
