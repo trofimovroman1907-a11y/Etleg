@@ -142,20 +142,39 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         hero.setBackground(createGlassCard(context, 28, 0.88f));
         hero.setElevation(AndroidUtilities.dp(5));
 
+        LinearLayout identity = new LinearLayout(context);
+        identity.setGravity(Gravity.CENTER_VERTICAL);
+        identity.setOrientation(LinearLayout.HORIZONTAL);
+
+        TextView monogram = new TextView(context);
+        monogram.setText("E");
+        monogram.setGravity(Gravity.CENTER);
+        monogram.setTextColor(0xFFFFFFFF);
+        monogram.setTextSize(24);
+        monogram.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        monogram.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(19), accentColor));
+        identity.addView(monogram, LayoutHelper.createLinear(58, 58, Gravity.CENTER_VERTICAL, 0, 0, 15, 0));
+
+        LinearLayout identityLabels = new LinearLayout(context);
+        identityLabels.setOrientation(LinearLayout.VERTICAL);
+        identityLabels.setGravity(Gravity.CENTER_VERTICAL);
+
         TextView brand = new TextView(context);
         brand.setText("Etleg");
         brand.setTextColor(textColor);
         brand.setTextSize(30);
         brand.setLetterSpacing(-0.025f);
         brand.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        hero.addView(brand, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        identityLabels.addView(brand, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         TextView subtitle = new TextView(context);
         subtitle.setText(LocaleController.getString(R.string.EtlegSettingsSubtitle));
         subtitle.setTextColor(secondaryColor);
         subtitle.setTextSize(14);
-        subtitle.setPadding(0, AndroidUtilities.dp(4), 0, 0);
-        hero.addView(subtitle, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        subtitle.setPadding(0, AndroidUtilities.dp(3), 0, 0);
+        identityLabels.addView(subtitle, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        identity.addView(identityLabels, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+        hero.addView(identity, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         content.addView(hero, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 16));
     }
 
