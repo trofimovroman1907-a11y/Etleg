@@ -45,11 +45,20 @@ jobs:
       - name: Build Etleg debug APK
         run: |
           chmod +x gradlew
-          # The fork uses its own applicationId, while the checked-in Firebase
-          # configuration only registers upstream Telegram package names.
-          # Skip Firebase resource generation for this preview APK; core Android
-          # compilation can still be checked, but Firebase push integration is
-          # intentionally not validated by this build.
+          # Keep preview builds focused on modern 64-bit Android devices.
+          python3 - <<'PY'
+          from pathlib import Path
+          build_file = Path("TMessagesProj_AppStandalone/build.gradle")
+          source = build_file.read_text()
+          full_abi_list = 'abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"'
+          arm64_only = 'abiFilters "arm64-v8a"'
+          if source.count(full_abi_list) != 1:
+              raise SystemExit("Expected standalone ABI filter was not found exactly once.")
+          build_file.write_text(source.replace(full_abi_list, arm64_only))
+          PY
+          # Firebase JSON only registers upstream Telegram package names.
+          # Skip Firebase resource generation for this preview APK; push
+          # notification integration is intentionally not validated here.
           ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
             -x :TMessagesProj_AppStandalone:processAfatDebugGoogleServices \
             --no-daemon --stacktrace
@@ -58,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: Etleg-Android-Preview
+          name: Etleg-Android-Preview-arm64
           path: TMessagesProj_AppStandalone/build/outputs/apk/**/*.apk
           if-no-files-found: error
           retention-days: 7
