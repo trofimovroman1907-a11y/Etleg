@@ -300,4 +300,6 @@
     <string name="EtlegFeatures">Что нового</string>
 
     <string name="EtlegTabSettings">Настройки</string>
+    <string name="EtlegAutoHideDock">Скрывать навигацию при прокрутке</string>
+    <string name="EtlegAutoHideDockInfo">Убирать плавающую панель во время прокрутки</string>
 </resources>
