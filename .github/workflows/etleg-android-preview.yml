@@ -42,6 +42,9 @@ jobs:
           sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
           yes | sdkmanager --licenses
 
+      - name: Run Etleg regression checks
+        run: python3 tools/etleg_regression_checks.py
+
       - name: Build Etleg debug APK
         run: |
           chmod +x gradlew
@@ -50,7 +53,23 @@ jobs:
           # exact Etleg application ID. Never reuse Telegram's Firebase client.
           python3 - <<'PY'
           import json
+          import os
           from pathlib import Path
+          import subprocess
+
+          # Never ship an Etleg APK signed with Telegram's upstream certificate.
+          # Preview keys are intentionally ephemeral; installing a new preview
+          # requires uninstalling the previous preview first.
+          preview_keystore = Path(os.environ["RUNNER_TEMP"]) / "etleg-preview.keystore"
+          subprocess.run([
+              "keytool", "-genkeypair", "-noprompt",
+              "-keystore", str(preview_keystore),
+              "-storepass", "etleg-preview-only",
+              "-alias", "etleg-preview",
+              "-keypass", "etleg-preview-only",
+              "-dname", "CN=Etleg Preview, OU=Development, O=Etleg",
+              "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
+          ], check=True)
 
           properties = {}
           for raw_line in Path("gradle.properties").read_text().splitlines():
@@ -73,6 +92,19 @@ jobs:
           if source.count(google_services_plugin) != 1:
               raise SystemExit("Expected standalone Google Services plugin was not found exactly once.")
           source = source.replace(full_abi_list, arm64_only)
+
+          # Replace only the debug signing configuration. Release signing stays untouched.
+          signing_replacements = [
+              ('storeFile file("../TMessagesProj/config/release.keystore")',
+               'storeFile file(System.getenv("RUNNER_TEMP") + "/etleg-preview.keystore")'),
+              ('storePassword RELEASE_STORE_PASSWORD', 'storePassword "etleg-preview-only"'),
+              ('keyAlias RELEASE_KEY_ALIAS', 'keyAlias "etleg-preview"'),
+              ('keyPassword RELEASE_KEY_PASSWORD', 'keyPassword "etleg-preview-only"'),
+          ]
+          for old_value, new_value in signing_replacements:
+              if source.count(old_value) != 2:
+                  raise SystemExit(f"Expected exactly two signing references for {old_value!r}.")
+              source = source.replace(old_value, new_value, 1)
 
           firebase_file = Path("TMessagesProj_AppStandalone/google-services.json")
           firebase_package = app_package + ".web"  # standalone debug applicationIdSuffix
@@ -104,6 +136,17 @@ jobs:
           PY
           ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
             --no-daemon --stacktrace
+
+      - name: Verify Etleg APK signature
+        run: |
+          APK_PATH="$(find TMessagesProj_AppStandalone/build/outputs/apk -type f -name 'app.apk' -print -quit)"
+          test -n "$APK_PATH"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK_PATH" | tee "$RUNNER_TEMP/etleg-signature.txt"
+          grep -q "Etleg Preview" "$RUNNER_TEMP/etleg-signature.txt"
+          if grep -q "Telegram" "$RUNNER_TEMP/etleg-signature.txt"; then
+            echo "Refusing to publish an Etleg APK signed as Telegram."
+            exit 1
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

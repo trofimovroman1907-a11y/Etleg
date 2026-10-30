@@ -1698,9 +1698,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         if (!isRequestingFirebaseSms) {
             return;
         }
-        needHideProgress(false);
-        isRequestingFirebaseSms = false;
 
+        // Keep the login button locked and the progress indicator visible until
+        // the server has selected a usable delivery method.
+        needShowProgress(0);
         TLRPC.TL_auth_resendCode req = new TLRPC.TL_auth_resendCode();
         req.phone_number = params.getString("phoneFormated");
         req.phone_code_hash = res.phone_code_hash;
@@ -1708,22 +1709,31 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             req.flags |= 1;
             req.reason = reason;
         }
-        ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
-            if (response != null && !(((TLRPC.auth_SentCode) response).type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms)) {
-                AndroidUtilities.runOnUIThread(() -> fillNextCodeParams(params, (TLRPC.auth_SentCode) response));
-            } else {
-                if (error != null) {
-                    FileLog.e("Etleg code delivery fallback failed: " + error.text);
-                } else {
-                    FileLog.d("Etleg code delivery fallback returned no supported alternative.");
-                }
-                final String fallbackError = error != null && error.text != null && error.text.length() > 0
-                        ? error.text
-                        : getString(R.string.SafetyNetErrorOccurred);
+        ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) ->
                 AndroidUtilities.runOnUIThread(() -> {
+                    isRequestingFirebaseSms = false;
+                    needHideProgress(false);
+
+                    if (response instanceof TLRPC.auth_SentCode) {
+                        TLRPC.auth_SentCode sentCode = (TLRPC.auth_SentCode) response;
+                        if (!(sentCode.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms)) {
+                            FileLog.d("Etleg code delivery fallback selected " + sentCode.type.getClass().getSimpleName());
+                            fillNextCodeParams(params, sentCode);
+                            return;
+                        }
+                        FileLog.e("Etleg code delivery fallback returned another Firebase SMS challenge.");
+                    } else if (error != null) {
+                        FileLog.e("Etleg code delivery fallback failed: " + error.text);
+                    } else {
+                        FileLog.e("Etleg code delivery fallback returned no auth.SentCode response.");
+                    }
+
                     if (getParentActivity() == null || getParentActivity().isFinishing() || getContext() == null) {
                         return;
                     }
+                    final String fallbackError = error != null && error.text != null && error.text.length() > 0
+                            ? error.text
+                            : getString(R.string.SafetyNetErrorOccurred);
                     new AlertDialog.Builder(getContext())
                             .setTitle(getString(R.string.AppName))
                             .setMessage(fallbackError)
@@ -1734,9 +1744,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                 }
                             })
                             .show();
-                });
-            }
-        }, ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagWithoutLogin);
+                }), ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagWithoutLogin);
     }
 
     public static String errorString(Throwable e) {
@@ -3098,9 +3106,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             settings.allow_missed_call = simcardAvailable && allowCall;
             settings.allow_app_hash = settings.allow_firebase = PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices();
             if (EtlegAppearance.isEtlegApp()) {
-                // Etleg has a different Android package and is not registered for Telegram's Firebase SMS attestation.
+                // Etleg has a different package/signing identity and must not advertise
+                // Telegram's Firebase attestation or Telegram's hard-coded SMS app hash.
                 settings.allow_firebase = false;
-                FileLog.d("Etleg: Firebase SMS challenge disabled for the unregistered custom package.");
+                settings.allow_app_hash = false;
+                FileLog.d("Etleg: Telegram Firebase attestation and SMS app hash disabled for the custom package.");
             } else if (forceDisableSafetyNet || TextUtils.isEmpty(BuildVars.SAFETYNET_KEY)) {
                 settings.allow_firebase = false;
             }

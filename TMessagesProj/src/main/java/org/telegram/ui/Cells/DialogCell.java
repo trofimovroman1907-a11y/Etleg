@@ -61,6 +61,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
@@ -1011,7 +1012,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private int computeHeight() {
         int height;
         if (isForumCell() && !isTransitionSupport && !collapsed) {
-            height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91);
+            height = dp(getEtlegChatRowHeight(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91));
             if (useSeparator) {
                 height += 1;
             }
@@ -1024,8 +1025,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         return height;
     }
 
+    private int getEtlegChatRowHeight(int normalHeight) {
+        if (EtlegAppearance.isEtlegApp() && EtlegPreferences.isCompactChatList()) {
+            return EtlegPreferences.getChatRowHeight(normalHeight);
+        }
+        return normalHeight;
+    }
+
     private int getCollapsedHeight() {
-        int height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault);
+        int normalHeight = useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault;
+        int height = dp(getEtlegChatRowHeight(normalHeight));
         if (useSeparator || true) {
             height += 1;
         }
@@ -4028,10 +4037,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
 
         if (EtlegAppearance.isEtlegApp()) {
-            float cardInset = dp(7);
-            etlegCardRect.set(cardInset, dp(3), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(3));
+            float cardInset = dp(10);
+            etlegCardRect.set(cardInset, dp(4), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(4));
             etlegCardPaint.setColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
-            canvas.drawRoundRect(etlegCardRect, dp(EtlegAppearance.getDialogCardRadiusDp()), dp(EtlegAppearance.getDialogCardRadiusDp()), etlegCardPaint);
+            canvas.drawRoundRect(etlegCardRect, dp(22), dp(22), etlegCardPaint);
         }
 
         float cornersRadius = dp(EtlegAppearance.isEtlegApp() ? 16 : 8) * cornerProgress;
@@ -4830,7 +4839,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             canvas.restore();
         }
 
-        if (useSeparator) {
+        if (useSeparator && !EtlegAppearance.isEtlegApp()) {
             int left;
             if (fullSeparator || currentDialogFolderId != 0 && archiveHidden && !fullSeparator2 || fullSeparator2 && !archiveHidden) {
                 left = 0;
