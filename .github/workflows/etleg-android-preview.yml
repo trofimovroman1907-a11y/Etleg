@@ -52,15 +52,22 @@ jobs:
           source = build_file.read_text()
           full_abi_list = 'abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"'
           arm64_only = 'abiFilters "arm64-v8a"'
+          google_services_plugin = "apply plugin: 'com.google.gms.google-services'"
           if source.count(full_abi_list) != 1:
               raise SystemExit("Expected standalone ABI filter was not found exactly once.")
-          build_file.write_text(source.replace(full_abi_list, arm64_only))
+          if source.count(google_services_plugin) != 1:
+              raise SystemExit("Expected standalone Google Services plugin was not found exactly once.")
+          source = source.replace(full_abi_list, arm64_only)
+          # Do not attach Telegram's Firebase identity to the Etleg preview.
+          # Removing the plugin from this temporary runner copy also avoids
+          # Gradle's generated-resource task dependency; push is not validated.
+          source = source.replace(
+              google_services_plugin,
+              "// Google Services disabled for the Etleg preview build."
+          )
+          build_file.write_text(source)
           PY
-          # Firebase JSON only registers upstream Telegram package names.
-          # Skip Firebase resource generation for this preview APK; push
-          # notification integration is intentionally not validated here.
           ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
-            -x :TMessagesProj_AppStandalone:processAfatDebugGoogleServices \
             --no-daemon --stacktrace
 
       - name: Upload APK
