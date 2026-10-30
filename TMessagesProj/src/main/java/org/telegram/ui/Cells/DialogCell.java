@@ -61,6 +61,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
@@ -69,6 +70,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
@@ -167,10 +169,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private boolean drawCommunityAvatar;
     private boolean isShareToStoryCell;
     public ShareDialogCell.RepostStoryDrawable repostStoryDrawable;
-    public int avatarStart = 11;
-    public int messagePaddingStart = 72;
-    public int heightDefault = 70;
-    public int heightThreeLines = 76;
+    public int avatarStart = 14;
+    public int messagePaddingStart = 80;
+    public int heightDefault = 80;
+    public int heightThreeLines = 92;
     public int addHeightForTags = 3;
     public int addForumHeightForTags = 11;
     public TLRPC.TL_forumTopic forumTopic;
@@ -646,6 +648,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private boolean isSelected;
 
     private RectF rect = new RectF();
+    private final RectF etlegCardRect = new RectF();
+    private final Paint etlegCardPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private DialogsAdapter.DialogsPreloader preloader;
     private Path counterPath;
     private RectF counterPathRect;
@@ -706,6 +710,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
         useForceThreeLines = forceThreeLines;
         currentAccount = account;
+        if (EtlegAppearance.isEtlegApp()) {
+            // Give Etleg's conversation list a roomier, card-oriented rhythm.
+            avatarStart = 16;
+            messagePaddingStart = 84;
+            heightDefault = 88;
+            heightThreeLines = 100;
+            addHeightForTags = 6;
+            addForumHeightForTags = 12;
+            chekBoxPaddingTop = 46;
+        }
 
         emojiStatusView = new View(context) {
             @Override
@@ -1008,7 +1022,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private int computeHeight() {
         int height;
         if (isForumCell() && !isTransitionSupport && !collapsed) {
-            height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91);
+            height = dp(getEtlegChatRowHeight(EtlegAppearance.isEtlegApp()
+                    ? (useForceThreeLines || SharedConfig.useThreeLinesLayout ? 98 : 104)
+                    : (useForceThreeLines || SharedConfig.useThreeLinesLayout ? 86 : 91)));
             if (useSeparator) {
                 height += 1;
             }
@@ -1021,8 +1037,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         return height;
     }
 
+    private int getEtlegChatRowHeight(int normalHeight) {
+        if (EtlegAppearance.isEtlegApp() && EtlegPreferences.isCompactChatList()) {
+            return EtlegPreferences.getChatRowHeight(normalHeight);
+        }
+        return normalHeight;
+    }
+
     private int getCollapsedHeight() {
-        int height = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault);
+        int normalHeight = useForceThreeLines || SharedConfig.useThreeLinesLayout ? heightThreeLines : heightDefault;
+        int height = dp(getEtlegChatRowHeight(normalHeight));
         if (useSeparator || true) {
             height += 1;
         }
@@ -2428,8 +2452,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         int avatarTop;
         int thumbLeft;
         if (useForceThreeLines || SharedConfig.useThreeLinesLayout) {
-            avatarTop = dp(11);
-            messageNameTop = dp(32);
+            avatarTop = dp(17);
+            messageNameTop = dp(35);
             timeTop = dp(13);
             errorTop = dp(42.33f);
             pinTop = dp(43);
@@ -2451,8 +2475,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 thumbImage[i].setImageCoords(thumbLeft + (thumbSize + 2) * i, avatarTop + dp(31) + (twoLinesForName ? dp(20) : 0) - (!(useForceThreeLines || SharedConfig.useThreeLinesLayout) && tags != null && !tags.isEmpty() ? dp(9) : 0), dp(18), dp(18));
             }
         } else {
-            avatarTop = dp(9);
-            messageNameTop = dp(31);
+            avatarTop = dp(14);
+            messageNameTop = dp(33);
             timeTop = dp(16);
             errorTop = dp(38);
             pinTop = dp(39);
@@ -4024,7 +4048,26 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             gtx += translationX;
         }
 
-        float cornersRadius = dp(8) * cornerProgress;
+        if (EtlegAppearance.isEtlegApp()) {
+            float cardInset = dp(8);
+            etlegCardRect.set(cardInset, dp(3), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(3));
+            etlegCardPaint.setStyle(Paint.Style.FILL);
+            etlegCardPaint.setColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
+            canvas.drawRoundRect(etlegCardRect, dp(24), dp(24), etlegCardPaint);
+
+            // A restrained glass rim separates each floating conversation surface
+            // from the list without adding a heavy divider.
+            etlegCardPaint.setStyle(Paint.Style.STROKE);
+            etlegCardPaint.setStrokeWidth(dp(1));
+            etlegCardPaint.setColor(Theme.multAlpha(
+                    Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider),
+                    Theme.isCurrentThemeDark() ? 0.10f : 0.075f
+            ));
+            canvas.drawRoundRect(etlegCardRect, dp(24), dp(24), etlegCardPaint);
+            etlegCardPaint.setStyle(Paint.Style.FILL);
+        }
+
+        float cornersRadius = dp(EtlegAppearance.isEtlegApp() ? 16 : 8) * cornerProgress;
         if (isSelected) {
             rect.set(0, 0, getMeasuredWidth(), AndroidUtilities.lerp(getMeasuredHeight(), getCollapsedHeight(), rightFragmentOpenedProgress));
             rect.offset(0, -translateY + collapseOffset);
@@ -4820,7 +4863,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             canvas.restore();
         }
 
-        if (useSeparator) {
+        if (useSeparator && !EtlegAppearance.isEtlegApp()) {
             int left;
             if (fullSeparator || currentDialogFolderId != 0 && archiveHidden && !fullSeparator2 || fullSeparator2 && !archiveHidden) {
                 left = 0;

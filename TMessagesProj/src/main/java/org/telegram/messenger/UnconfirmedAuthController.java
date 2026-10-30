@@ -242,40 +242,21 @@ public class UnconfirmedAuthController {
                         hashes.add(auth.hash);
                     }
                 }
-                if (!confirm) {
-                    for (int i = 0; i < auths.size(); ++i) {
-                        if (hashes.contains(auths.get(i).hash)) {
-                            auths.remove(i);
-                            i--;
-                        }
+                for (int i = 0; i < auths.size(); ++i) {
+                    if (hashes.contains(auths.get(i).hash)) {
+                        auths.remove(i);
+                        i--;
                     }
-                    if (!hashes.isEmpty()) {
-                        saveCache();
-                        NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.unconfirmedAuthUpdate);
-                        scheduleAuthExpireCheck();
-                    }
+                }
+                if (!hashes.isEmpty()) {
+                    saveCache();
+                    NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.unconfirmedAuthUpdate);
+                    scheduleAuthExpireCheck();
                 }
                 whenDone.run(success);
             },
             callbacks
         );
-        if (confirm) {
-            final HashSet<Long> hashes = new HashSet<>();
-            for (int i = 0; i < list.size(); ++i) {
-                hashes.add(list.get(i).hash);
-            }
-            for (int i = 0; i < auths.size(); ++i) {
-                if (hashes.contains(auths.get(i).hash)) {
-                    auths.remove(i);
-                    i--;
-                }
-            }
-            if (!hashes.isEmpty()) {
-                saveCache();
-                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.unconfirmedAuthUpdate);
-                scheduleAuthExpireCheck();
-            }
-        }
     }
 
     public void confirm(ArrayList<UnconfirmedAuth> list, Utilities.Callback<ArrayList<UnconfirmedAuth>> whenDone) {

@@ -158,22 +158,26 @@ public class UnconfirmedAuthHintCell extends FrameLayout {
         final boolean bot = _bot;
 
         yesButton.setOnClickListener(v -> {
-            SpannableStringBuilder message = AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.UnconfirmedAuthConfirmedMessage), Theme.key_undo_cancelColor, REPLACING_TAG_TYPE_LINK, () -> {
-                Bulletin.hideVisible();
-                fragment.presentFragment(new SessionsActivity(0));
-            });
-            SpannableString arrowStr = new SpannableString(">");
-            ColoredImageSpan span = new ColoredImageSpan(R.drawable.attach_arrow_right);
-            span.setOverrideColor(Theme.getColor(Theme.key_undo_cancelColor));
-            span.setScale(.7f, .7f);
-            span.setWidth(dp(12));
-            arrowStr.setSpan(span, 0, arrowStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            AndroidUtilities.replaceCharSequence(">", message, arrowStr);
-            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.contact_check, LocaleController.getString(bot ? R.string.UnconfirmedAuthConfirmedBot : R.string.UnconfirmedAuthConfirmed), message).show();
+            yesButton.setLoading(true);
             MessagesController.getInstance(currentAccount).getUnconfirmedAuthController().confirm(auths, success -> {
-
+                yesButton.setLoading(false);
+                if (success == null || success.isEmpty()) {
+                    BulletinFactory.of(fragment).createErrorBulletin(LocaleController.getString(R.string.UnknownError)).show();
+                    return;
+                }
+                SpannableStringBuilder message = AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.UnconfirmedAuthConfirmedMessage), Theme.key_undo_cancelColor, REPLACING_TAG_TYPE_LINK, () -> {
+                    Bulletin.hideVisible();
+                    fragment.presentFragment(new SessionsActivity(0));
+                });
+                SpannableString arrowStr = new SpannableString(">");
+                ColoredImageSpan span = new ColoredImageSpan(R.drawable.attach_arrow_right);
+                span.setOverrideColor(Theme.getColor(Theme.key_undo_cancelColor));
+                span.setScale(.7f, .7f);
+                span.setWidth(dp(12));
+                arrowStr.setSpan(span, 0, arrowStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                AndroidUtilities.replaceCharSequence(">", message, arrowStr);
+                BulletinFactory.of(fragment).createSimpleBulletin(R.raw.contact_check, LocaleController.getString(bot ? R.string.UnconfirmedAuthConfirmedBot : R.string.UnconfirmedAuthConfirmed), message).show();
             });
-            MessagesController.getInstance(currentAccount).getUnconfirmedAuthController().cleanup();
         });
         noButton.setOnClickListener(v -> {
             noButton.setLoading(true);

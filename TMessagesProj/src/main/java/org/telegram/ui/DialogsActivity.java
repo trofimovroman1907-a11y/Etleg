@@ -107,6 +107,7 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.FilesMigrationService;
@@ -3200,6 +3201,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     @Override
     public View createView(final Context context) {
+        EtlegAppearance.applyTheme();
         searching = false;
         searchWas = false;
         wasDrawn = false;
@@ -3249,8 +3251,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (initialDialogsType == DIALOGS_TYPE_ADD_USERS_TO || isArchive() && getDialogsArray(currentAccount, initialDialogsType, folderId, false).isEmpty()) {
             searchItem.setVisibility(View.GONE);
         }
-        searchItem.setVisibility(View.GONE);
-
         if (!onlySelect && searchString == null && folderId == 0 && communityId == 0) {
             doneItem = new ActionBarMenuItem(context, null, getThemedColor(Theme.key_actionBarDefaultSelector), getThemedColor(Theme.key_actionBarDefaultIcon), true);
             doneItem.setText(LocaleController.getString(R.string.Done).toUpperCase());
@@ -3495,7 +3495,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 actionBar.setTitle(getString(R.string.SelectChat));
             }
-            actionBar.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            actionBar.setBackgroundColor(getThemedColor(EtlegAppearance.isEtlegApp() ? Theme.key_actionBarDefault : Theme.key_windowBackgroundWhite));
         } else {
             if (searchString != null || folderId != 0 || communityId != 0) {
                 actionBar.setBackButtonDrawable(backDrawable = new BackDrawable(false));
@@ -3513,11 +3513,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
                 statusDrawable.center = true;
-                logoDrawable = context.getResources().getDrawable(R.drawable.telegram_logo_2).mutate();
-                logoDrawable.setBounds(0, dp(2), logoDrawable.getIntrinsicWidth(), dp(2) + logoDrawable.getIntrinsicHeight());
-                logoDrawable.setColorFilter(getThemedColor(Theme.key_telegram_color_dialogsLogo), PorterDuff.Mode.MULTIPLY);
-                SpannableStringBuilder ssb = new SpannableStringBuilder(getString(R.string.AppName));
-                ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                SpannableStringBuilder ssb = new SpannableStringBuilder("Etleg");
                 actionBar.setTitle(ssb, statusDrawable);
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
             }
@@ -5394,7 +5390,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             actionBar.addView(avatarContainer, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, 0, 0, 40, 0));
             floatingButton3.imageView.setVisibility(View.INVISIBLE);
             actionBar.setOccupyStatusBar(false);
-            actionBar.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            actionBar.setBackgroundColor(getThemedColor(EtlegAppearance.isEtlegApp() ? Theme.key_actionBarDefault : Theme.key_windowBackgroundWhite));
             if (fragmentContextViewWrapper != null) {
                 AndroidUtilities.removeFromParent(fragmentContextViewWrapper);
             }

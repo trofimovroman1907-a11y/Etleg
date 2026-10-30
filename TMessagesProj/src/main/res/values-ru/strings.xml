@@ -274,4 +274,32 @@
     <string name="RemindTodayAt">\'Отправить сегодня в\' HH:mm</string>
     <string name="RemindDayAt">\'Отправить\' d MMM \'в\' HH:mm</string>
     <string name="RemindDayYearAt">\'Напомнить\' d MMM yyyy \'в\' HH:mm</string>
+
+    <string name="EtlegSettingsSubtitle">Ваше пространство — ваши правила</string>
+    <string name="EtlegInterfaceSection">Интерфейс</string>
+    <string name="EtlegCompactChats">Компактный список чатов</string>
+    <string name="EtlegCompactChatsInfo">Больше диалогов на одном экране</string>
+    <string name="EtlegTabLabels">Подписи навигации</string>
+    <string name="EtlegTabLabelsInfo">Показывать названия под значками</string>
+    <string name="EtlegReducedMotion">Меньше анимации</string>
+    <string name="EtlegReducedMotionInfo">Более короткие и спокойные переходы</string>
+    <string name="EtlegInteractionSection">Взаимодействие</string>
+    <string name="EtlegHaptics">Отклик при касании</string>
+    <string name="EtlegHapticsInfo">Лёгкая вибрация при нажатии навигации</string>
+    <string name="EtlegAboutSection">О Etleg</string>
+    <string name="EtlegAboutText">Неофициальный клиент на основе Telegram. Сообщения и звонки продолжают работать через сервисы Telegram.</string>
+
+
+    <string name="EtlegAccountSection">Аккаунт и безопасность</string>
+    <string name="EtlegProfile">Профиль</string>
+    <string name="EtlegDevices">Активные устройства</string>
+    <string name="EtlegPrivacy">Конфиденциальность и безопасность</string>
+    <string name="EtlegPremium">Премиум</string>
+    <string name="EtlegBusiness">Бизнес-инструменты</string>
+    <string name="EtlegHelp">Центр помощи</string>
+    <string name="EtlegFeatures">Что нового</string>
+
+    <string name="EtlegTabSettings">Настройки</string>
+    <string name="EtlegAutoHideDock">Скрывать навигацию при прокрутке</string>
+    <string name="EtlegAutoHideDockInfo">Убирать плавающую панель во время прокрутки</string>
 </resources>

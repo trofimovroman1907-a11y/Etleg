@@ -97,6 +97,7 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.AutoDeleteMediaTask;
 import org.telegram.messenger.BackupAgent;
 import org.telegram.messenger.BetaUpdate;
@@ -446,6 +447,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         flagSecureReason.attach();
 
         super.onCreate(savedInstanceState);
+        EtlegAppearance.applyTheme();
         if (Build.VERSION.SDK_INT >= 24) {
             AndroidUtilities.isInMultiwindow = isInMultiWindowMode();
         }
