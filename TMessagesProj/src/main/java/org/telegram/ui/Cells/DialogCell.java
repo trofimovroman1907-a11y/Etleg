@@ -4039,8 +4039,20 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         if (EtlegAppearance.isEtlegApp()) {
             float cardInset = dp(10);
             etlegCardRect.set(cardInset, dp(4), getMeasuredWidth() - cardInset, getMeasuredHeight() - dp(4));
+            etlegCardPaint.setStyle(Paint.Style.FILL);
             etlegCardPaint.setColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
             canvas.drawRoundRect(etlegCardRect, dp(22), dp(22), etlegCardPaint);
+
+            // A restrained glass rim separates each floating conversation surface
+            // from the list without adding a heavy divider.
+            etlegCardPaint.setStyle(Paint.Style.STROKE);
+            etlegCardPaint.setStrokeWidth(dp(1));
+            etlegCardPaint.setColor(Theme.multAlpha(
+                    Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider),
+                    Theme.isCurrentThemeDark() ? 0.10f : 0.075f
+            ));
+            canvas.drawRoundRect(etlegCardRect, dp(22), dp(22), etlegCardPaint);
+            etlegCardPaint.setStyle(Paint.Style.FILL);
         }
 
         float cornersRadius = dp(EtlegAppearance.isEtlegApp() ? 16 : 8) * cornerProgress;
