@@ -3,6 +3,7 @@ package org.telegram.ui;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.os.Bundle;
@@ -116,6 +117,16 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         }
     }
 
+    private Drawable createGlassCard(Context context, int radiusDp, float opacity) {
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(AndroidUtilities.dp(radiusDp));
+        background.setColor(Theme.multAlpha(cardColor, opacity));
+        int outline = Theme.isCurrentThemeDark() ? 0x28D8F0EC : 0xA6FFFFFF;
+        background.setStroke(AndroidUtilities.dp(1), outline);
+        return background;
+    }
+
     private void updatePalette() {
         cardColor = Theme.getColor(Theme.key_dialogBackground);
         textColor = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText);
@@ -128,8 +139,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER_VERTICAL);
         hero.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20));
-        hero.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(28), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.88f : 0.82f)));
-        hero.setElevation(AndroidUtilities.dp(3));
+        hero.setBackground(createGlassCard(context, 28, 0.88f));
+        hero.setElevation(AndroidUtilities.dp(5));
 
         TextView brand = new TextView(context);
         brand.setText("Etleg");
@@ -161,8 +172,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addSwitchCard(Context context, SettingRow row) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
-        card.setElevation(AndroidUtilities.dp(2));
+        card.setBackground(createGlassCard(context, 24, 0.90f));
+        card.setElevation(AndroidUtilities.dp(4));
         addSwitchRow(context, row, card);
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
     }
@@ -289,8 +300,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         about.setTextSize(13);
         about.setLineSpacing(AndroidUtilities.dp(3), 1f);
         about.setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(17), AndroidUtilities.dp(18), AndroidUtilities.dp(17));
-        about.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
-        about.setElevation(AndroidUtilities.dp(2));
+        about.setBackground(createGlassCard(context, 24, 0.90f));
+        about.setElevation(AndroidUtilities.dp(4));
         content.addView(about, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
