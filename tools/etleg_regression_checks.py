@@ -110,5 +110,27 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("new EtlegSettingsActivity(args)", settings_branch)
         self.assertIn("new SettingsActivity(args)", settings_branch)
 
+
+    def test_etleg_glass_refinement_updates_transparency_and_component_scale(self):
+        appearance = (ROOT / "TMessagesProj/src/main/java/org/telegram/messenger/EtlegAppearance.java").read_text()
+        settings = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/EtlegSettingsActivity.java").read_text()
+        tabs = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java").read_text()
+
+        self.assertIn("set(Theme.key_dialogBackground, 0xC9253539);", appearance)
+        self.assertIn("set(Theme.key_actionBarDefault, 0xC91A3438);", appearance)
+        self.assertIn("set(Theme.key_dialogBackground, 0xD6FFFFFF);", appearance)
+        self.assertIn("createGlassCard(context, 26, 0.80f)", settings)
+        self.assertIn("AndroidUtilities.dp(52)", settings)
+        self.assertIn("brand.setTextSize(28)", settings)
+        self.assertIn("AndroidUtilities.dp(12), AndroidUtilities.dp(12)", settings)
+        self.assertIn("LayoutHelper.createLinear(40, 40", settings)
+        self.assertIn("title.setTextSize(14)", settings)
+        self.assertIn("LayoutHelper.createLinear(34, 34", settings)
+        self.assertIn("? 348 : 328", tabs)
+        self.assertIn("tabsViewBackground.setRadius(dp(28));", tabs)
+        self.assertIn("tabsView.setElevation(dp(16));", tabs)
+        self.assertIn("EtlegAppearance.isEtlegApp()", tabs)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
