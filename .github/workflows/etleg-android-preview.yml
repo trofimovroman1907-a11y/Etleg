@@ -48,7 +48,14 @@ jobs:
       - name: Build Etleg debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug --no-daemon --stacktrace
+          # The fork uses its own applicationId, while the checked-in Firebase
+          # configuration only registers upstream Telegram package names.
+          # Skip Firebase resource generation for this preview APK; core Android
+          # compilation can still be checked, but Firebase push integration is
+          # intentionally not validated by this build.
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
+            -x :TMessagesProj_AppStandalone:processAfatDebugGoogleServices \
+            --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
