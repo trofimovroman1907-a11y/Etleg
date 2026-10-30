@@ -1,6 +1,9 @@
 name: Etleg Android Preview
 
 on:
+  push:
+    branches:
+      - etleg-performance-v1
   pull_request:
     branches:
       - etleg-account-isolation
