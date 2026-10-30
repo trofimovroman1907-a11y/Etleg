@@ -167,6 +167,13 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
             canvas.save();
             canvas.scale(s, s, tmpRectF.centerX(), tmpRectF.centerY());
             canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
+            if (etleg) {
+                paintCounterBackground.setStyle(Paint.Style.STROKE);
+                paintCounterBackground.setStrokeWidth(dp(1));
+                paintCounterBackground.setColor(Theme.multAlpha(colorSelected, 0.22f * alpha));
+                canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
+                paintCounterBackground.setStyle(Paint.Style.FILL);
+            }
             canvas.restore();
         }
 
