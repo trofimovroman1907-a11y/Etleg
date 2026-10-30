@@ -71,6 +71,7 @@ import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatThemeController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
@@ -233,6 +234,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
     @Override
     public View createView(Context context) {
+        EtlegAppearance.applyTheme();
         contentView = new SizeNotifierFrameLayout(context) {
             @Override
             protected void dispatchDraw(Canvas canvas) {
@@ -298,7 +300,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         leftButtonIsBack = true; // the view may be rebuilt (theme, language): checkUi_menuItems swaps it to QR again
         actionBar.setAllowOverlayTitle(true);
         actionBar.setUseContainerForTitles();
-        actionBar.setTitle(getString(R.string.Settings));
+        if (EtlegAppearance.isEtlegApp() && hasMainTabs) {
+            actionBar.setTitle("Etleg");
+            actionBar.setSubtitle(getString(R.string.Settings));
+        } else {
+            actionBar.setTitle(getString(R.string.Settings));
+        }
         actionBar.setAdditionalTextLeft(-dp(4));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
@@ -726,6 +733,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         items.add(SettingCell.Factory.of(9, IconBackgroundColors.ORANGE_DEEP.top, IconBackgroundColors.ORANGE_DEEP.bottom, R.drawable.settings_power, getString(R.string.SettingsPowerSaving), getString(R.string.SettingsPowerSavingInfo)));
         items.add(SettingCell.Factory.of(10, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_language, getString(R.string.SettingsLanguage), LocaleController.getCurrentLanguageName()));
 
+        if (EtlegAppearance.isEtlegApp()) {
+            items.add(UItem.asShadow(null));
+            items.add(UItem.asHeader("Etleg"));
+            items.add(SettingCell.Factory.of(27, 0xFF267B78, 0xFF1D6663, R.drawable.settings_chat, getString(R.string.EtlegSettingsTitle)));
+        }
         items.add(UItem.asShadow(null));
         if (!walletAbove && getMessagesController().config.walletAvailable.get()) {
             final GramWallet wallet = GramWallet.getInstance(currentAccount);
@@ -734,7 +746,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         }
 
         if (!getMessagesController().premiumFeaturesBlocked()) {
-            items.add(SettingCell.Factory.of(11, 0xFFB659FF, 0xFF617CFF, R.drawable.settings_premium, getString(R.string.TelegramPremium)));
+            items.add(SettingCell.Factory.of(11, 0xFFB659FF, 0xFF617CFF, R.drawable.settings_premium, getString(EtlegAppearance.isEtlegApp() ? R.string.EtlegPremium : R.string.TelegramPremium)));
         }
         if (getMessagesController().starsPurchaseAvailable()) {
             StarsController c = StarsController.getInstance(currentAccount);
@@ -749,7 +761,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         }
 
         if (!getMessagesController().premiumFeaturesBlocked()) {
-            items.add(SettingCell.Factory.of(15, 0xFFF45255, 0xFFDF3955, R.drawable.settings_business, getString(R.string.TelegramBusiness)));
+            items.add(SettingCell.Factory.of(15, 0xFFF45255, 0xFFDF3955, R.drawable.settings_business, getString(EtlegAppearance.isEtlegApp() ? R.string.EtlegBusiness : R.string.TelegramBusiness)));
         }
         if (!getMessagesController().premiumPurchaseBlocked()) {
             items.add(SettingCell.Factory.of(16, 0xFFF38B31, 0xFFE26314, R.drawable.settings_gift, getString(R.string.SendAGift)));
@@ -759,8 +771,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
         items.add(UItem.asHeader(getString(R.string.SettingsHelp)));
         items.add(SettingCell.Factory.of(17, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_ask, getString(R.string.AskAQuestion)));
-        items.add(SettingCell.Factory.of(18, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_faq, getString(R.string.TelegramFAQ)));
-        items.add(SettingCell.Factory.of(23, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_features, getString(R.string.TelegramFeatures)));
+        items.add(SettingCell.Factory.of(18, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_faq, getString(EtlegAppearance.isEtlegApp() ? R.string.EtlegHelp : R.string.TelegramFAQ)));
+        items.add(SettingCell.Factory.of(23, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_features, getString(EtlegAppearance.isEtlegApp() ? R.string.EtlegFeatures : R.string.TelegramFeatures)));
         items.add(SettingCell.Factory.of(19, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_policy, getString(R.string.PrivacyPolicy)));
 
         if (SharedSettings.experimentalSettingsAllowed.get()) {
@@ -863,6 +875,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 break;
             case 10:
                 presentSettingFragment(new LanguageSelectActivity());
+                break;
+            case 27:
+                if (EtlegAppearance.isEtlegApp()) {
+                    presentSettingFragment(new EtlegSettingsActivity());
+                }
                 break;
 
             case 11:

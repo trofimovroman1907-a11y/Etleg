@@ -29,6 +29,8 @@ import androidx.core.math.MathUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DocumentObject;
+import org.telegram.messenger.EtlegAppearance;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
@@ -153,10 +155,14 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         final float selectedFactor = hasGestureSelectedOverride ? gestureSelectedOverride : isSelectedAnimator.getFloatValue();
         if (selectedFactor > 0 && !skipDrawSelector) {
             final float alpha = AnimatorUtils.DECELERATE_INTERPOLATOR.getInterpolation(selectedFactor);
-
-            paintCounterBackground.setColor(Theme.multAlpha(colorSelected, 0.09f * alpha));
-            tmpRectF.set(0, 0, viewWidth, getHeight());
-            final float r = Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
+            final boolean etleg = EtlegAppearance.isEtlegApp();
+            paintCounterBackground.setColor(Theme.multAlpha(colorSelected, (etleg ? 0.15f : 0.09f) * alpha));
+            if (etleg) {
+                tmpRectF.set(dp(3), dp(3), viewWidth - dp(3), getHeight() - dp(3));
+            } else {
+                tmpRectF.set(0, 0, viewWidth, getHeight());
+            }
+            final float r = etleg ? dp(17) : Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
             final float s = lerp(0.6f, 1, selectedFactor) * MathUtils.clamp(attachScale, 0, 1);
             canvas.save();
             canvas.scale(s, s, tmpRectF.centerX(), tmpRectF.centerY());
@@ -220,6 +226,14 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     private Drawable premiumStarDrawable;
 
+    public void setEtlegLabelsVisible(boolean visible) {
+        if (!EtlegAppearance.isEtlegApp()) {
+            return;
+        }
+        textView.setVisibility(visible ? VISIBLE : GONE);
+        imageView.setTranslationY(visible ? 0 : dp(9));
+    }
+
     public void setCounter(String text, boolean isError, boolean animated) {
         counter.setText(text, animated);
         isHasCounterAnimator.setValue(!TextUtils.isEmpty(text), animated);
@@ -279,6 +293,22 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     private void checkPlayAnimation(boolean animated) {
         final boolean isSelected = isSelectedAnimator.getValue();
+
+        if (EtlegAppearance.isEtlegApp() && tabAnimation != null) {
+            int icon = 0;
+            if (tabAnimation == TabAnimation.CHATS) icon = R.drawable.etleg_tab_chats;
+            else if (tabAnimation == TabAnimation.CONTACTS) icon = R.drawable.etleg_tab_contacts;
+            else if (tabAnimation == TabAnimation.CALLS) icon = R.drawable.etleg_tab_calls;
+            else if (tabAnimation == TabAnimation.SETTINGS) icon = R.drawable.etleg_tab_settings;
+            if (icon != 0) {
+                if (lastIconAnimationRaw != icon) {
+                    lastIconAnimationRaw = icon;
+                    imageView.setImageResource(icon);
+                }
+                updateColors();
+                return;
+            }
+        }
 
         if (tabAnimationBot !=  null) {
             boolean animatedIcon = true;
@@ -403,6 +433,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         tab.tabAnimation = tabAnimation;
         tab.textView.setText(LocaleController.getString(stringRes));
         tab.checkPlayAnimation(false);
+        tab.setEtlegLabelsVisible(EtlegPreferences.isTabLabelsEnabled());
         tab.imageView.setLayoutParams(LayoutHelper.createFrame(24, 24, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 4, 0, 0));
         tab.colorDefault = Theme.getColor(Theme.key_glass_tabUnselected, resourcesProvider);
         tab.colorSelected = Theme.getColor(Theme.key_glass_tabSelected, resourcesProvider);

@@ -41,6 +41,8 @@ import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
@@ -269,6 +271,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     @Override
     public void onResume() {
         super.onResume();
+        EtlegAppearance.applyTheme();
+        if (EtlegAppearance.isEtlegApp() && tabs != null) {
+            selectTab(viewPager.getCurrentPosition(), false);
+        }
         blur3_updateColors();
         checkContactsTabBadge();
         checkUnreadCount(true);
@@ -300,18 +306,20 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
     @Override
     public View createView(Context context) {
+        EtlegAppearance.applyTheme();
         super.createView(context);
         tabletLayout = false;
 
         tabsView = new MainTabsLayout(context, resourceProvider);
         tabsView.setClipChildren(false);
-        tabsView.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4));
-        tabsView.setMaxWidth(dp(328 + DialogsActivity.MAIN_TABS_MARGIN * 2));
+        final int dockInset = EtlegAppearance.isEtlegApp() ? 10 : DialogsActivity.MAIN_TABS_MARGIN + 4;
+        tabsView.setPadding(dp(dockInset), dp(dockInset), dp(dockInset), dp(dockInset));
+        tabsView.setMaxWidth(dp((EtlegAppearance.isEtlegApp() ? 344 : 328) + DialogsActivity.MAIN_TABS_MARGIN * 2));
 
         tabs = new GlassTabView[TABS_COUNT];
         tabs[INDEX_CHATS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats);
         tabs[INDEX_CONTACTS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CONTACTS, R.string.MainTabsContacts);
-        tabs[INDEX_SETTINGS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.SETTINGS, R.string.Settings);
+        tabs[INDEX_SETTINGS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.SETTINGS, EtlegAppearance.isEtlegApp() ? R.string.EtlegTabSettings : R.string.Settings);
         tabs[INDEX_CALLS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CALLS, R.string.MainTabsCalls);
         tabs[INDEX_CHATS].setOnLongClickListener(this::openFoldersSelector);
         tabs[INDEX_CONTACTS].setOnLongClickListener(this::openContactsSelector);
@@ -328,6 +336,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
             final int position = indexToPosition(index);
             tabs[index].setOnClickListener(v -> {
+                EtlegPreferences.performHapticFeedback(view);
                 if (viewPager.isManualScrolling() || viewPager.isTouch()) {
                     return;
                 }
@@ -354,23 +363,32 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         final ViewPositionWatcher viewPositionWatcher = new ViewPositionWatcher(contentView);
 
-        BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
-        iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
-        iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
+        if (EtlegAppearance.isEtlegApp()) {
+            tabsViewBackground = null;
+            tabsView.setBackground(Theme.createRoundRectDrawable(dp(27), getThemedColor(Theme.key_dialogBackground)));
+            tabsView.setElevation(dp(12));
+        } else {
+            BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
+            iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
+            iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
 
-        tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
-        tabsViewBackground.setRadius(dp(DialogsActivity.MAIN_TABS_HEIGHT / 2f));
-        tabsViewBackground.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN - 0.334f));
-        tabsView.setBackground(tabsViewBackground);
-
-        BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
-        iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
+            tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
+            tabsViewBackground.setRadius(dp(DialogsActivity.MAIN_TABS_HEIGHT / 2f));
+            tabsViewBackground.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN - 0.334f));
+            tabsView.setBackground(tabsViewBackground);
+        }
 
         fadeView = new View(context);
-        BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
-        fadeDrawable.setFadeHeight(dp(60), true);
-        fadeView.setBackground(fadeDrawable);
-
+        if (EtlegAppearance.isEtlegApp()) {
+            // Etleg uses a clean, opaque dock surface rather than Telegram's glass fade.
+            fadeView.setBackgroundColor(0x00000000);
+        } else {
+            BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);
+            iBlur3FactoryFade.setSourceRootView(viewPositionWatcher, contentView);
+            BlurredBackgroundWithFadeDrawable fadeDrawable = new BlurredBackgroundWithFadeDrawable(iBlur3FactoryFade.create(fadeView, null));
+            fadeDrawable.setFadeHeight(dp(60), true);
+            fadeView.setBackground(fadeDrawable);
+        }
         contentView.addView(fadeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 0, Gravity.BOTTOM));
 
         tabsViewWrapper = new FrameLayout(context);
@@ -802,6 +820,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         } else if (position == POSITION_SETTINGS) {
             Bundle args = new Bundle();
             args.putBoolean("hasMainTabs", true);
+            if (EtlegAppearance.isEtlegApp()) {
+                return new EtlegSettingsActivity(args);
+            }
             return new SettingsActivity(args);
         } else if (position == POSITION_CHATS) {
             Bundle args = new Bundle();
@@ -822,8 +843,14 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     public GlassTabView[] tabs;
 
     public void selectTab(int position, boolean animated) {
+        if (EtlegAppearance.isEtlegApp() && EtlegPreferences.isReducedMotion()) {
+            animated = false;
+        }
         for (int a = 0; a < tabs.length; a++) {
             GlassTabView tab = tabs[a];
+            if (EtlegAppearance.isEtlegApp()) {
+                tab.setEtlegLabelsVisible(EtlegPreferences.isTabLabelsEnabled());
+            }
             tab.setSelected(indexToPosition(a) == position, animated);
         }
     }
@@ -1058,7 +1085,14 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     private class MainTabsActivityControllerImpl implements MainTabsActivityController {
         @Override
         public void setTabsVisible(boolean visible) {
-            animatorTabsVisible.setValue(visible, true);
+            if (EtlegAppearance.isEtlegApp()) {
+                if (!EtlegPreferences.isAutoHideDockEnabled()) {
+                    visible = true;
+                }
+                animatorTabsVisible.setValue(visible, !EtlegPreferences.isReducedMotion());
+            } else {
+                animatorTabsVisible.setValue(visible, true);
+            }
         }
     }
 
@@ -1154,8 +1188,18 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         iBlur3SourceTabGlass.updateDisplayListIfNeeded();
     }
 
+    private boolean iBlur3FadeColorInitialized;
+    private int iBlur3FadeColor;
+
     private void blur3_updateFadeColors() {
-        iBlur3SourceColor.setColor(getEstBackgroundColor());
+        final int color = getEstBackgroundColor();
+        if (iBlur3FadeColorInitialized && iBlur3FadeColor == color) {
+            return;
+        }
+
+        iBlur3FadeColorInitialized = true;
+        iBlur3FadeColor = color;
+        iBlur3SourceColor.setColor(color);
         if (fadeView != null) {
             fadeView.invalidate();
         }
@@ -1163,6 +1207,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
     private void blur3_updateColors() {
         blur3_updateFadeColors();
+        if (EtlegAppearance.isEtlegApp() && tabsView != null && tabsViewBackground == null) {
+            tabsView.setBackground(Theme.createRoundRectDrawable(dp(24), getThemedColor(Theme.key_dialogBackground)));
+            tabsView.setElevation(dp(9));
+        }
         if (tabsViewBackground != null) {
             tabsViewBackground.updateColors();
         }

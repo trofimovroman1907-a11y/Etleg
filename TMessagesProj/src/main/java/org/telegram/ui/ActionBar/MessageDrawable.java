@@ -22,6 +22,7 @@ import android.graphics.drawable.NinePatchDrawable;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.blur3.utils.NinePatchBuilder;
@@ -332,7 +333,7 @@ public class MessageDrawable extends Drawable {
         } else if (overrideRounding > 0) {
             newRad = 0;
         } else {
-            newRad = dp(SharedConfig.bubbleRadius);
+            newRad = dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius);
         }
         int idx;
         if (isTopNear && isBottomNear) {
@@ -452,7 +453,7 @@ public class MessageDrawable extends Drawable {
         if (gradientShader == null && !isSelected && crossfadeFromDrawable == null) {
             return null;
         }
-        int newRad = dp(SharedConfig.bubbleRadius);
+        int newRad = dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius);
         int idx;
         if (isTopNear && isBottomNear) {
             idx = 3;
@@ -575,14 +576,14 @@ public class MessageDrawable extends Drawable {
             rad = overrideRoundRadius;
             nearRad = overrideRoundRadius;
         } else if (overrideRounding > 0) {
-            rad = AndroidUtilities.lerp(dp(SharedConfig.bubbleRadius), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
-            nearRad = AndroidUtilities.lerp(dp(Math.min(6, SharedConfig.bubbleRadius)), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
+            rad = AndroidUtilities.lerp(dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
+            nearRad = AndroidUtilities.lerp(dp(EtlegAppearance.isEtlegApp() ? 10 : Math.min(6, SharedConfig.bubbleRadius)), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
         } else if (currentType == TYPE_PREVIEW) {
             rad = dp(6);
             nearRad = dp(6);
         } else {
-            rad = dp(SharedConfig.bubbleRadius);
-            nearRad = dp(Math.min(6, SharedConfig.bubbleRadius));
+            rad = dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius);
+            nearRad = dp(EtlegAppearance.isEtlegApp() ? 10 : Math.min(6, SharedConfig.bubbleRadius));
         }
         int smallRad = dp(6);
 
@@ -638,14 +639,14 @@ public class MessageDrawable extends Drawable {
             rad = overrideRoundRadius;
             nearRad = overrideRoundRadius;
         } else if (overrideRounding > 0) {
-            rad = AndroidUtilities.lerp(dp(SharedConfig.bubbleRadius), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
-            nearRad = AndroidUtilities.lerp(dp(Math.min(6, SharedConfig.bubbleRadius)), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
+            rad = AndroidUtilities.lerp(dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
+            nearRad = AndroidUtilities.lerp(dp(EtlegAppearance.isEtlegApp() ? 10 : Math.min(6, SharedConfig.bubbleRadius)), Math.min(bounds.width(), bounds.height()) / 2, overrideRounding);
         } else if (currentType == TYPE_PREVIEW) {
             rad = dp(6);
             nearRad = dp(6);
         } else {
-            rad = dp(SharedConfig.bubbleRadius);
-            nearRad = dp(Math.min(6, SharedConfig.bubbleRadius));
+            rad = dp(EtlegAppearance.isEtlegApp() ? EtlegAppearance.getMessageBubbleRadiusDp() : SharedConfig.bubbleRadius);
+            nearRad = dp(EtlegAppearance.isEtlegApp() ? 10 : Math.min(6, SharedConfig.bubbleRadius));
         }
         int smallRad = dp(6);
         int top = Math.max(bounds.top, 0);
