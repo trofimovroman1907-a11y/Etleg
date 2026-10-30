@@ -1082,7 +1082,14 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     private class MainTabsActivityControllerImpl implements MainTabsActivityController {
         @Override
         public void setTabsVisible(boolean visible) {
-            animatorTabsVisible.setValue(visible, true);
+            if (EtlegAppearance.isEtlegApp()) {
+                if (!EtlegPreferences.isAutoHideDockEnabled()) {
+                    visible = true;
+                }
+                animatorTabsVisible.setValue(visible, !EtlegPreferences.isReducedMotion());
+            } else {
+                animatorTabsVisible.setValue(visible, true);
+            }
         }
     }
 
