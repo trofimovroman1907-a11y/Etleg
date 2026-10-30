@@ -128,7 +128,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER_VERTICAL);
         hero.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20), AndroidUtilities.dp(20));
-        hero.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(26), cardColor));
+        hero.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(28), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.88f : 0.82f)));
+        hero.setElevation(AndroidUtilities.dp(3));
 
         TextView brand = new TextView(context);
         brand.setText("Etleg");
@@ -160,7 +161,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
     private void addSwitchCard(Context context, SettingRow row) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+        card.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
+        card.setElevation(AndroidUtilities.dp(2));
         addSwitchRow(context, row, card);
         content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
     }
@@ -284,7 +286,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         about.setTextSize(13);
         about.setLineSpacing(AndroidUtilities.dp(3), 1f);
         about.setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(17), AndroidUtilities.dp(18), AndroidUtilities.dp(17));
-        about.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(22), cardColor));
+        about.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(24), Theme.multAlpha(cardColor, Theme.isCurrentThemeDark() ? 0.90f : 0.84f)));
+        about.setElevation(AndroidUtilities.dp(2));
         content.addView(about, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
