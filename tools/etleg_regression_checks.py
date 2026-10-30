@@ -49,7 +49,7 @@ class EtlegRegressionChecks(unittest.TestCase):
     def test_preview_build_uses_an_etleg_signing_identity(self):
         workflow = (ROOT / ".github/workflows/etleg-android-preview.yml").read_text()
         self.assertIn('CN=Etleg Preview', workflow)
-        self.assertIn("apksigner verify --verbose --print-certs", workflow)
+        self.assertIn('/build-tools/36.0.0/apksigner" verify --verbose --print-certs', workflow)
         self.assertIn('grep -q "Etleg Preview"', workflow)
         self.assertIn('grep -q "Telegram"', workflow)
 
