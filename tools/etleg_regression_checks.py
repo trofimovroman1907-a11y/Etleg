@@ -101,5 +101,12 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("EtlegPreferences.isCompactChatList()", source)
         self.assertIn("EtlegAppearance.isEtlegApp()", source)
 
+    def test_etleg_settings_tab_opens_the_custom_control_center(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java").read_text()
+        settings_branch = source[source.index("position == POSITION_SETTINGS"):source.index("position == POSITION_CHATS")]
+        self.assertIn("EtlegAppearance.isEtlegApp()", settings_branch)
+        self.assertIn("new EtlegSettingsActivity(args)", settings_branch)
+        self.assertIn("new SettingsActivity(args)", settings_branch)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
