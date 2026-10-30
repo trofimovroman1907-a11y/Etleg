@@ -373,10 +373,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         iBlur3FactoryGlass.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
 
         tabsViewBackground = iBlur3FactoryGlass.create(tabsView, BlurredBackgroundProviderImpl.mainTabs(resourceProvider));
-        tabsViewBackground.setRadius(dp(32));
-        tabsViewBackground.setPadding(dp(1.5f));
+        tabsViewBackground.setRadius(dp(30));
+        tabsViewBackground.setPadding(dp(1));
         tabsView.setBackground(tabsViewBackground);
-        tabsView.setElevation(dp(18));
+        tabsView.setElevation(dp(20));
 
         fadeView = new View(context);
         BlurredBackgroundDrawableViewFactory iBlur3FactoryFade = new BlurredBackgroundDrawableViewFactory(iBlur3SourceColor);

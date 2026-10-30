@@ -45,7 +45,7 @@ public final class EtlegAppearance {
             set(Theme.key_dialogBackground, 0xD9253539);
             set(Theme.key_dialogBackgroundGray, 0xC92B4145);
 
-            set(Theme.key_actionBarDefault, 0xCC1A3438);
+            set(Theme.key_actionBarDefault, 0xD91A3438);
             set(Theme.key_actionBarDefaultIcon, 0xFFE8F2F0);
             set(Theme.key_actionBarDefaultTitle, 0xFFE8F2F0);
             set(Theme.key_actionBarDefaultSubtitle, 0xFF9EB6B4);
@@ -90,10 +90,10 @@ public final class EtlegAppearance {
             set(Theme.key_windowBackgroundWhite, 0xFFF0F5F4);
             set(Theme.key_windowBackgroundGray, 0xFFE7EFED);
             set(Theme.key_windowBackgroundGrayShadow, 0x160D3435);
-            set(Theme.key_dialogBackground, 0xE6FFFFFF);
+            set(Theme.key_dialogBackground, 0xE8FFFFFF);
             set(Theme.key_dialogBackgroundGray, 0xDDFBFCFC);
 
-            set(Theme.key_actionBarDefault, 0xFF17464A);
+            set(Theme.key_actionBarDefault, 0xE817464A);
             set(Theme.key_actionBarDefaultIcon, 0xFFF4FAF8);
             set(Theme.key_actionBarDefaultTitle, 0xFFF4FAF8);
             set(Theme.key_actionBarDefaultSubtitle, 0xFFBDD4D1);
