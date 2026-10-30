@@ -120,7 +120,7 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("set(Theme.key_actionBarDefault, 0xC91A3438);", appearance)
         self.assertIn("set(Theme.key_dialogBackground, 0xD6FFFFFF);", appearance)
         self.assertIn("createGlassCard(context, 26, 0.80f)", settings)
-        self.assertIn("AndroidUtilities.dp(52)", settings)
+        self.assertIn("LayoutHelper.createLinear(52, 52", settings)
         self.assertIn("brand.setTextSize(28)", settings)
         self.assertIn("AndroidUtilities.dp(12), AndroidUtilities.dp(12)", settings)
         self.assertIn("LayoutHelper.createLinear(40, 40", settings)
