@@ -137,6 +137,7 @@ public final class EtlegAppearance {
     }
 
     private static void set(int key, int color) {
+        Theme.setDefaultColor(key, color);
         Theme.setColor(key, color, false);
     }
 
