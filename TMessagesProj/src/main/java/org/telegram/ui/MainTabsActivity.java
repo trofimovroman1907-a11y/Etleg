@@ -42,6 +42,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.EtlegAppearance;
+import org.telegram.messenger.EtlegPreferences;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
@@ -271,6 +272,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     public void onResume() {
         super.onResume();
         EtlegAppearance.applyTheme();
+        if (EtlegAppearance.isEtlegApp() && tabs != null) {
+            selectTab(viewPager.getCurrentPosition(), false);
+        }
         blur3_updateColors();
         checkContactsTabBadge();
         checkUnreadCount(true);
@@ -308,8 +312,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         tabsView = new MainTabsLayout(context, resourceProvider);
         tabsView.setClipChildren(false);
-        tabsView.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4));
-        tabsView.setMaxWidth(dp(328 + DialogsActivity.MAIN_TABS_MARGIN * 2));
+        final int dockInset = EtlegAppearance.isEtlegApp() ? 10 : DialogsActivity.MAIN_TABS_MARGIN + 4;
+        tabsView.setPadding(dp(dockInset), dp(dockInset), dp(dockInset), dp(dockInset));
+        tabsView.setMaxWidth(dp((EtlegAppearance.isEtlegApp() ? 344 : 328) + DialogsActivity.MAIN_TABS_MARGIN * 2));
 
         tabs = new GlassTabView[TABS_COUNT];
         tabs[INDEX_CHATS] = GlassTabView.createMainTab(context, resourceProvider, GlassTabView.TabAnimation.CHATS, R.string.MainTabsChats);
@@ -331,6 +336,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
             final int position = indexToPosition(index);
             tabs[index].setOnClickListener(v -> {
+                EtlegPreferences.performHapticFeedback(view);
                 if (viewPager.isManualScrolling() || viewPager.isTouch()) {
                     return;
                 }
@@ -359,8 +365,8 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         if (EtlegAppearance.isEtlegApp()) {
             tabsViewBackground = null;
-            tabsView.setBackground(Theme.createRoundRectDrawable(dp(24), getThemedColor(Theme.key_dialogBackground)));
-            tabsView.setElevation(dp(9));
+            tabsView.setBackground(Theme.createRoundRectDrawable(dp(27), getThemedColor(Theme.key_dialogBackground)));
+            tabsView.setElevation(dp(12));
         } else {
             BlurredBackgroundDrawableViewFactory iBlur3FactoryGlass = new BlurredBackgroundDrawableViewFactory(iBlur3SourceTabGlass != null ? iBlur3SourceTabGlass : iBlur3SourceColor);
             iBlur3FactoryGlass.setSourceRootView(viewPositionWatcher, contentView);
@@ -831,8 +837,14 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     public GlassTabView[] tabs;
 
     public void selectTab(int position, boolean animated) {
+        if (EtlegAppearance.isEtlegApp() && EtlegPreferences.isReducedMotion()) {
+            animated = false;
+        }
         for (int a = 0; a < tabs.length; a++) {
             GlassTabView tab = tabs[a];
+            if (EtlegAppearance.isEtlegApp()) {
+                tab.setEtlegLabelsVisible(EtlegPreferences.isTabLabelsEnabled());
+            }
             tab.setSelected(indexToPosition(a) == position, animated);
         }
     }
