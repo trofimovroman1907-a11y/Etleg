@@ -817,6 +817,9 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         } else if (position == POSITION_SETTINGS) {
             Bundle args = new Bundle();
             args.putBoolean("hasMainTabs", true);
+            if (EtlegAppearance.isEtlegApp()) {
+                return new EtlegSettingsActivity(args);
+            }
             return new SettingsActivity(args);
         } else if (position == POSITION_CHATS) {
             Bundle args = new Bundle();
