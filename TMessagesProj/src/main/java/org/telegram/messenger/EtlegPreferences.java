@@ -12,6 +12,7 @@ public final class EtlegPreferences {
     private static final String REDUCED_MOTION = "reduced_motion";
     private static final String HAPTIC_FEEDBACK = "haptic_feedback";
     private static final String TAB_LABELS = "tab_labels";
+    private static final String AUTO_HIDE_DOCK = "auto_hide_dock";
 
     private EtlegPreferences() {
     }
@@ -62,6 +63,15 @@ public final class EtlegPreferences {
 
     public static void setTabLabelsEnabled(Context context, boolean value) {
         if (EtlegAppearance.isEtlegApp() && context != null) prefs(context).edit().putBoolean(TAB_LABELS, value).apply();
+    }
+
+    public static boolean isAutoHideDockEnabled() {
+        Context context = appContext();
+        return isEtleg() && context != null && prefs(context).getBoolean(AUTO_HIDE_DOCK, true);
+    }
+
+    public static void setAutoHideDockEnabled(Context context, boolean value) {
+        if (EtlegAppearance.isEtlegApp() && context != null) prefs(context).edit().putBoolean(AUTO_HIDE_DOCK, value).apply();
     }
 
     public static int getChatRowHeight(int normalHeight) {
