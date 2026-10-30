@@ -145,7 +145,8 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         TextView brand = new TextView(context);
         brand.setText("Etleg");
         brand.setTextColor(textColor);
-        brand.setTextSize(28);
+        brand.setTextSize(30);
+        brand.setLetterSpacing(-0.025f);
         brand.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         hero.addView(brand, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -196,7 +197,7 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
             card = new LinearLayout(context);
             card.setOrientation(LinearLayout.VERTICAL);
             card.setBackground(createGlassCard(context, 24, Theme.isCurrentThemeDark() ? 0.90f : 0.84f));
-            card.setElevation(AndroidUtilities.dp(2));
+        card.setElevation(AndroidUtilities.dp(4));
             content.addView(card, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, 14));
         }
         addSwitchRow(context, row, card);
@@ -245,6 +246,11 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         toggle.setOnCheckedChangeListener((button, checked) -> row.action.onChanged(checked));
         line.addView(toggle, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 8, 0, 0, 0));
         line.setBackground(Theme.getSelectorDrawable(true));
+        if (card.getChildCount() > 0) {
+            View divider = new View(context);
+            divider.setBackgroundColor(Theme.multAlpha(secondaryColor, Theme.isCurrentThemeDark() ? 0.16f : 0.13f));
+            card.addView(divider, new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, AndroidUtilities.dp(1)));
+        }
         card.addView(line, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
@@ -290,6 +296,11 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
         line.addView(arrow, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
         line.setBackground(Theme.getSelectorDrawable(true));
         line.setOnClickListener(v -> action.run());
+        if (card.getChildCount() > 0) {
+            View divider = new View(context);
+            divider.setBackgroundColor(Theme.multAlpha(secondaryColor, Theme.isCurrentThemeDark() ? 0.16f : 0.13f));
+            card.addView(divider, new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, AndroidUtilities.dp(1)));
+        }
         card.addView(line, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
