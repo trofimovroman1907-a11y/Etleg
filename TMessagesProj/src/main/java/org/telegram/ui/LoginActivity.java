@@ -129,6 +129,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.CallReceiver;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.EtlegAppearance;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
@@ -1768,6 +1769,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             return;
         }
         if (res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms && !res.type.verifiedFirebase && !isRequestingFirebaseSms) {
+            if (EtlegAppearance.isEtlegApp()) {
+                FileLog.d("Etleg custom package: requesting a server-supported code delivery method instead of Firebase SMS attestation");
+                needShowProgress(0);
+                isRequestingFirebaseSms = true;
+                resendCodeFromSafetyNet(params, res, "ETLEG_CUSTOM_PACKAGE_FALLBACK");
+                return;
+            }
             if (PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices()) {
                 TLRPC.TL_auth_sentCodeTypeFirebaseSms r = (TLRPC.TL_auth_sentCodeTypeFirebaseSms) res.type;
                 needShowProgress(0);
