@@ -1712,13 +1712,21 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             if (response != null && !(((TLRPC.auth_SentCode) response).type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms)) {
                 AndroidUtilities.runOnUIThread(() -> fillNextCodeParams(params, (TLRPC.auth_SentCode) response));
             } else {
+                if (error != null) {
+                    FileLog.e("Etleg code delivery fallback failed: " + error.text);
+                } else {
+                    FileLog.d("Etleg code delivery fallback returned no supported alternative.");
+                }
+                final String fallbackError = error != null && error.text != null && error.text.length() > 0
+                        ? error.text
+                        : getString(R.string.SafetyNetErrorOccurred);
                 AndroidUtilities.runOnUIThread(() -> {
                     if (getParentActivity() == null || getParentActivity().isFinishing() || getContext() == null) {
                         return;
                     }
                     new AlertDialog.Builder(getContext())
-                            .setTitle(getString(R.string.RestorePasswordNoEmailTitle))
-                            .setMessage(getString(R.string.SafetyNetErrorOccurred))
+                            .setTitle(getString(R.string.AppName))
+                            .setMessage(fallbackError)
                             .setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                                 forceDisableSafetyNet = true;
                                 if (currentViewNum != VIEW_PHONE_INPUT) {
