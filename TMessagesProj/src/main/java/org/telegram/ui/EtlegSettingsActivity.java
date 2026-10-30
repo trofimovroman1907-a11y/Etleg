@@ -28,7 +28,6 @@ import org.telegram.ui.Components.LayoutHelper;
 /** Etleg's own interface controls. No stock Telegram theme-page redirects. */
 public class EtlegSettingsActivity extends BaseFragment implements MainTabsActivity.TabFragmentDelegate {
     private LinearLayout content;
-    private boolean hasMainTabs;
     private int cardColor;
     private int textColor;
     private int secondaryColor;
@@ -40,13 +39,6 @@ public class EtlegSettingsActivity extends BaseFragment implements MainTabsActiv
 
     public EtlegSettingsActivity(Bundle args) {
         super(args);
-    }
-
-    @Override
-    public boolean onFragmentCreate() {
-        hasMainTabs = arguments != null && arguments.getBoolean("hasMainTabs", false);
-        additionNavigationBarHeight = hasMainTabs ? AndroidUtilities.dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
-        return super.onFragmentCreate();
     }
 
     @Override
