@@ -3495,7 +3495,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 actionBar.setTitle(getString(R.string.SelectChat));
             }
-            actionBar.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            actionBar.setBackgroundColor(getThemedColor(EtlegAppearance.isEtlegApp() ? Theme.key_actionBarDefault : Theme.key_windowBackgroundWhite));
         } else {
             if (searchString != null || folderId != 0 || communityId != 0) {
                 actionBar.setBackButtonDrawable(backDrawable = new BackDrawable(false));
@@ -5390,7 +5390,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             actionBar.addView(avatarContainer, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, 0, 0, 40, 0));
             floatingButton3.imageView.setVisibility(View.INVISIBLE);
             actionBar.setOccupyStatusBar(false);
-            actionBar.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            actionBar.setBackgroundColor(getThemedColor(EtlegAppearance.isEtlegApp() ? Theme.key_actionBarDefault : Theme.key_windowBackgroundWhite));
             if (fragmentContextViewWrapper != null) {
                 AndroidUtilities.removeFromParent(fragmentContextViewWrapper);
             }
