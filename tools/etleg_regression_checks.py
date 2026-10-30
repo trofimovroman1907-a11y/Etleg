@@ -46,6 +46,25 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn("EtlegAppearance.isEtlegApp()", self.settings)
         self.assertIn("EtlegSettingsTitle", self.settings)
 
+    def test_unconfirmed_auth_confirm_removes_only_successful_items_after_responses(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/messenger/UnconfirmedAuthController.java").read_text()
+        body = method_body(source, "private void updateList(boolean confirm,")
+        response_results = body.index("if (results[i])")
+        removal = body.index("auths.remove(i)")
+        callback = body.index("whenDone.run(success)")
+        self.assertLess(response_results, removal)
+        self.assertLess(removal, callback)
+        self.assertNotIn("if (confirm) {\n            final HashSet<Long> hashes", body)
+
+    def test_unconfirmed_auth_confirmation_waits_for_server_result(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Cells/UnconfirmedAuthHintCell.java").read_text()
+        body = method_body(source, "public void set(final BaseFragment fragment, int currentAccount)")
+        click = body[body.index("yesButton.setOnClickListener"):body.index("noButton.setOnClickListener")]
+        self.assertIn("yesButton.setLoading(true)", click)
+        self.assertIn("if (success == null || success.isEmpty())", click)
+        self.assertNotIn(".cleanup()", click)
+        self.assertLess(click.index("confirm(auths"), click.index("createSimpleBulletin"))
+
     def test_preview_build_uses_an_etleg_signing_identity(self):
         workflow = (ROOT / ".github/workflows/etleg-android-preview.yml").read_text()
         self.assertIn('CN=Etleg Preview', workflow)
