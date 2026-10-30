@@ -11,16 +11,23 @@ import org.telegram.ui.ActionBar.Theme;
 public final class EtlegAppearance {
 
     private static final String PACKAGE_PREFIX = "app.etleg.messenger";
+    private static volatile int packageState;
 
     private EtlegAppearance() {
     }
 
     public static boolean isEtlegApp() {
+        int cached = packageState;
+        if (cached != 0) {
+            return cached > 0;
+        }
         if (ApplicationLoader.applicationContext == null) {
             return false;
         }
         String packageName = ApplicationLoader.applicationContext.getPackageName();
-        return packageName != null && packageName.startsWith(PACKAGE_PREFIX);
+        boolean matches = packageName != null && packageName.startsWith(PACKAGE_PREFIX);
+        packageState = matches ? 1 : -1;
+        return matches;
     }
 
     public static void applyTheme() {
@@ -60,6 +67,15 @@ public final class EtlegAppearance {
             set(Theme.key_chat_outBubbleShadow, 0x22000000);
             set(Theme.key_chat_messageTextIn, 0xFFE8F1EF);
             set(Theme.key_chat_messageTextOut, 0xFFEAF6F3);
+            set(Theme.key_chat_messagePanelBackground, 0xFF182B2E);
+            set(Theme.key_chat_messagePanelShadow, 0x22000000);
+            set(Theme.key_chat_messagePanelText, 0xFFE7F1EF);
+            set(Theme.key_chat_messagePanelHint, 0xFF8DA5A2);
+            set(Theme.key_chat_messagePanelCursor, 0xFF65B8AE);
+            set(Theme.key_chat_messagePanelIcons, 0xFFB1C5C2);
+            set(Theme.key_chat_messagePanelSend, 0xFF58B4A8);
+            set(Theme.key_chat_attachIcon, 0xFFB1C5C2);
+            set(Theme.key_chat_attachActiveTab, 0xFF58B4A8);
 
             set(Theme.key_glass_defaultIcon, 0xFFB2C7C4);
             set(Theme.key_glass_defaultText, 0xFFB2C7C4);
@@ -99,6 +115,15 @@ public final class EtlegAppearance {
             set(Theme.key_chat_outBubbleShadow, 0x140D3435);
             set(Theme.key_chat_messageTextIn, 0xFF203437);
             set(Theme.key_chat_messageTextOut, 0xFF183D3A);
+            set(Theme.key_chat_messagePanelBackground, 0xFFF8FBFA);
+            set(Theme.key_chat_messagePanelShadow, 0x160D3435);
+            set(Theme.key_chat_messagePanelText, 0xFF203437);
+            set(Theme.key_chat_messagePanelHint, 0xFF8A9B99);
+            set(Theme.key_chat_messagePanelCursor, 0xFF267B78);
+            set(Theme.key_chat_messagePanelIcons, 0xFF587875);
+            set(Theme.key_chat_messagePanelSend, 0xFF267B78);
+            set(Theme.key_chat_attachIcon, 0xFF587875);
+            set(Theme.key_chat_attachActiveTab, 0xFF267B78);
 
             set(Theme.key_glass_defaultIcon, 0xFF557774);
             set(Theme.key_glass_defaultText, 0xFF557774);
