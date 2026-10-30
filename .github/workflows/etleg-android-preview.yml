@@ -46,8 +46,23 @@ jobs:
         run: |
           chmod +x gradlew
           # Keep preview builds focused on modern 64-bit Android devices.
+          # Enable FCM only when the Firebase file explicitly registers this
+          # exact Etleg application ID. Never reuse Telegram's Firebase client.
           python3 - <<'PY'
+          import json
           from pathlib import Path
+
+          properties = {}
+          for raw_line in Path("gradle.properties").read_text().splitlines():
+              line = raw_line.strip()
+              if line and not line.startswith("#") and "=" in line:
+                  key, value = line.split("=", 1)
+                  properties[key.strip()] = value.strip()
+
+          app_package = properties.get("APP_PACKAGE")
+          if not app_package:
+              raise SystemExit("APP_PACKAGE is missing from gradle.properties.")
+
           build_file = Path("TMessagesProj_AppStandalone/build.gradle")
           source = build_file.read_text()
           full_abi_list = 'abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"'
@@ -58,13 +73,33 @@ jobs:
           if source.count(google_services_plugin) != 1:
               raise SystemExit("Expected standalone Google Services plugin was not found exactly once.")
           source = source.replace(full_abi_list, arm64_only)
-          # Do not attach Telegram's Firebase identity to the Etleg preview.
-          # Removing the plugin from this temporary runner copy also avoids
-          # Gradle's generated-resource task dependency; push is not validated.
-          source = source.replace(
-              google_services_plugin,
-              "// Google Services disabled for the Etleg preview build."
-          )
+
+          firebase_file = Path("TMessagesProj_AppStandalone/google-services.json")
+          firebase_package = app_package + ".web"  # standalone debug applicationIdSuffix
+          has_matching_firebase_client = False
+          if firebase_file.is_file():
+              try:
+                  config = json.loads(firebase_file.read_text())
+                  has_matching_firebase_client = any(
+                      client.get("client_info", {}).get("android_client_info", {}).get("package_name")
+                      == firebase_package
+                      for client in config.get("client", [])
+                  )
+              except (ValueError, OSError) as error:
+                  raise SystemExit(f"Firebase configuration is invalid: {error}")
+
+          if has_matching_firebase_client:
+              print(f"Firebase configuration found for {firebase_package}; keeping Google Services enabled.")
+          else:
+              print(
+                  f"WARNING: no Firebase client for {firebase_package}. "
+                  "Building without FCM. Add an Etleg Firebase app and matching google-services.json to enable push."
+              )
+              source = source.replace(
+                  google_services_plugin,
+                  "// Google Services disabled: no matching Etleg Firebase application is registered."
+              )
+
           build_file.write_text(source)
           PY
           ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug \
