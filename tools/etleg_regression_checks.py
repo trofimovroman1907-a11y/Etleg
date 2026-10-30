@@ -73,5 +73,33 @@ class EtlegRegressionChecks(unittest.TestCase):
         self.assertIn('grep -q "Telegram"', workflow)
 
 
+    def test_etleg_settings_are_native_and_do_not_redirect_to_stock_theme_pages(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/EtlegSettingsActivity.java").read_text()
+        self.assertIn("EtlegPreferences", source)
+        self.assertIn("addSwitchRow", source)
+        self.assertNotIn("openTheme(", source)
+        self.assertNotIn("new ThemeActivity(", source)
+
+    def test_etleg_preferences_are_app_local_and_have_safe_defaults(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/messenger/EtlegPreferences.java").read_text()
+        self.assertIn('"etleg_ui"', source)
+        self.assertIn("isCompactChatList", source)
+        self.assertIn("isReducedMotion", source)
+        self.assertIn("isHapticEnabled", source)
+        self.assertIn("isTabLabelsEnabled", source)
+
+    def test_etleg_navigation_uses_custom_static_icons_and_preferences(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Components/glass/GlassTabView.java").read_text()
+        self.assertIn("EtlegAppearance.isEtlegApp()", source)
+        self.assertIn("etleg_tab_chats", source)
+        tabs = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java").read_text()
+        self.assertIn("EtlegPreferences.isReducedMotion()", tabs)
+        self.assertIn("EtlegPreferences.performHapticFeedback", tabs)
+
+    def test_etleg_compact_chat_rows_are_package_gated(self):
+        source = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java").read_text()
+        self.assertIn("EtlegPreferences.isCompactChatList()", source)
+        self.assertIn("EtlegAppearance.isEtlegApp()", source)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
