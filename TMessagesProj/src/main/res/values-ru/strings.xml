@@ -289,4 +289,14 @@
     <string name="EtlegAboutSection">О Etleg</string>
     <string name="EtlegAboutText">Неофициальный клиент на основе Telegram. Сообщения и звонки продолжают работать через сервисы Telegram.</string>
 
+
+    <string name="EtlegAccountSection">Аккаунт и безопасность</string>
+    <string name="EtlegProfile">Профиль</string>
+    <string name="EtlegDevices">Активные устройства</string>
+    <string name="EtlegPrivacy">Конфиденциальность и безопасность</string>
+    <string name="EtlegPremium">Премиум</string>
+    <string name="EtlegBusiness">Бизнес-инструменты</string>
+    <string name="EtlegHelp">Центр помощи</string>
+    <string name="EtlegFeatures">Что нового</string>
+
 </resources>
