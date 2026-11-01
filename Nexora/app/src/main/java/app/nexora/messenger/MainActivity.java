@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
     private String activeRoomId;
     private String activeRoomName;
     private volatile boolean syncing;
-    private long since;
+    private String syncToken;
     private EditText messageInput;
     private LinearLayout timeline;
     private TextView statusView;
@@ -70,8 +70,22 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         homeserver = getPreferences(0).getString("homeserver", "https://matrix.org");
-        accessToken = getPreferences(0).getString("token", null);
-        userId = getPreferences(0).getString("user", null);
+        try {
+            accessToken = SecureSessionStore.read(this, "token");
+            userId = getPreferences(0).getString("user", null);
+            if (accessToken == null) {
+                String legacy = getPreferences(0).getString("token", null);
+                if (legacy != null) {
+                    SecureSessionStore.write(this, "token", legacy);
+                    getPreferences(0).edit().remove("token").apply();
+                    accessToken = legacy;
+                }
+            }
+        } catch (Exception e) {
+            getPreferences(0).edit().remove("token").remove("user").apply();
+            accessToken = null;
+            userId = null;
+        }
         if (accessToken != null && userId != null) loadRooms();
         else showLogin();
     }
@@ -98,7 +112,7 @@ public class MainActivity extends Activity {
         TextView register = button("Создать аккаунт", Color.WHITE, INK);
         register.setBackground(shape(Color.WHITE, LINE, 15));
         page.addView(register, lp(-1, 54));
-        TextView note = text("Для закрытого сервера регистрация может быть доступна только по приглашению. Сервер должен быть настроен отдельно.", 12, MUTED, false);
+        TextView note = text("Регистрация зависит от настроек сервера. Сквозное шифрование пока не подключено — не используй Nexora для секретной переписки.", 12, MUTED, false);
         note.setLineSpacing(dp(3), 1f); page.addView(note);
         login.setOnClickListener(v -> authenticate(server.getText().toString(), username.getText().toString(),
                 password.getText().toString(), false));
@@ -136,9 +150,10 @@ public class MainActivity extends Activity {
                 String token = response.optString("access_token", "");
                 String id = response.optString("user_id", "");
                 if (token.isEmpty() || id.isEmpty()) throw new Exception("Сервер не вернул сессию.");
+                SecureSessionStore.write(this, "token", token);
                 accessToken = token; userId = id;
                 getPreferences(0).edit().putString("homeserver", homeserver)
-                        .putString("token", token).putString("user", id).apply();
+                        .putString("user", id).apply();
                 runOnUiThread(this::loadRooms);
             } catch (Exception e) {
                 String msg = e.getMessage() == null ? "Не удалось подключиться" : e.getMessage();
@@ -152,7 +167,7 @@ public class MainActivity extends Activity {
         io.execute(() -> {
             try {
                 JSONObject sync = request("GET", homeserver + "/_matrix/client/v3/sync?timeout=0", accessToken, null);
-                since = sync.optString("next_batch", "").hashCode();
+                syncToken = sync.optString("next_batch", null);
                 parseRooms(sync);
                 runOnUiThread(this::showChats);
                 startSync();
@@ -169,16 +184,13 @@ public class MainActivity extends Activity {
         if (syncing) return;
         syncing = true;
         io.execute(() -> {
-            String next = "";
+            String next = syncToken == null ? "" : syncToken;
             try {
-                JSONObject initial = request("GET", homeserver + "/_matrix/client/v3/sync?timeout=0", accessToken, null);
-                next = initial.optString("next_batch", "");
-                parseRooms(initial);
-                runOnUiThread(() -> { if (accessToken != null) showChats(); });
                 while (syncing && accessToken != null) {
                     String url = homeserver + "/_matrix/client/v3/sync?timeout=25000&since=" + enc(next);
                     JSONObject data = request("GET", url, accessToken, null);
                     next = data.optString("next_batch", next);
+                    syncToken = next;
                     parseRooms(data);
                     final String room = activeRoomId;
                     runOnUiThread(() -> {
@@ -226,7 +238,7 @@ public class MainActivity extends Activity {
         TextView add = button("＋  Начать переписку", ACCENT, Color.WHITE);
         add.setOnClickListener(v -> showCreateRoom());
         body.addView(add, lp(-1, 50));
-        statusView = text("Подключено к " + homeserver, 12, MUTED, false);
+        statusView = text("Тестовая версия · сквозное шифрование пока не подключено", 12, MUTED, false);
         body.addView(statusView);
         ScrollView scroll = new ScrollView(this);
         LinearLayout list = col(8); list.setPadding(0, dp(4), 0, dp(12));
@@ -290,7 +302,10 @@ public class MainActivity extends Activity {
         LinearLayout top=new LinearLayout(this); top.setGravity(Gravity.CENTER_VERTICAL); top.setPadding(dp(16),dp(10),dp(16),dp(10));
         TextView back=text("‹",32,ACCENT,true); back.setOnClickListener(v->{activeRoomId=null;showChats();});
         top.addView(back,lp(40,48));
-        top.addView(text(room.name,18,INK,true),new LinearLayout.LayoutParams(0,-2,1));
+        LinearLayout titleCol=col(2);
+        titleCol.addView(text(room.name,17,INK,true));
+        titleCol.addView(text("Обычная Matrix-комната · без E2EE",11,MUTED,false));
+        top.addView(titleCol,new LinearLayout.LayoutParams(0,-2,1));
         root.addView(top);
         ScrollView scroll=new ScrollView(this); timeline=col(8); timeline.setPadding(dp(14),dp(12),dp(14),dp(12));
         scroll.addView(timeline); root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
@@ -372,7 +387,8 @@ public class MainActivity extends Activity {
     private void logout(){
         syncing=false; String token=accessToken;
         io.execute(()->{try{if(token!=null)request("POST",homeserver+"/_matrix/client/v3/logout",token,new JSONObject());}catch(Exception ignored){}});
-        accessToken=null;userId=null;activeRoomId=null;rooms.clear();
+        accessToken=null;userId=null;activeRoomId=null;rooms.clear();syncToken=null;
+        try { SecureSessionStore.clear(this, "token"); } catch (Exception ignored) {}
         getPreferences(0).edit().remove("token").remove("user").apply();showLogin();
     }
 
