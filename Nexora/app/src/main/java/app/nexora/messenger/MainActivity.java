@@ -248,7 +248,7 @@ public class MainActivity extends Activity {
                 card.setGravity(Gravity.CENTER_VERTICAL); card.setPadding(dp(14), dp(12), dp(14), dp(12));
                 card.setBackground(shape(Color.WHITE, LINE, 15));
                 TextView avatar = text(initial(room.name), 18, ACCENT, true);
-                avatar.setGravity(Gravity.CENTER); avatar.setBackground(shape(0xFFEDE9FF, 18));
+                avatar.setGravity(Gravity.CENTER); avatar.setBackground(shape(0xFFEDE9FF, 0xFFEDE9FF, 18));
                 card.addView(avatar, lp(46,46));
                 LinearLayout labels=col(3); labels.setPadding(dp(12),0,0,0);
                 labels.addView(text(room.name,15,INK,true));
@@ -400,7 +400,7 @@ public class MainActivity extends Activity {
 
     private LinearLayout base(){LinearLayout l=new LinearLayout(this);l.setOrientation(1);l.setBackgroundColor(BG);return l;}
     private LinearLayout col(int gap){LinearLayout l=new LinearLayout(this);l.setOrientation(1);GradientDrawable d=new GradientDrawable();d.setColor(Color.TRANSPARENT);d.setSize(dp(1),dp(gap));l.setDividerDrawable(d);l.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);return l;}
-    private View header(String title,String sub){LinearLayout h=new LinearLayout(this);h.setGravity(Gravity.CENTER_VERTICAL);h.setPadding(dp(18),dp(12),dp(18),dp(12));TextView mark=text("N",23,ACCENT,true);mark.setGravity(Gravity.CENTER);mark.setBackground(shape(0xFFEDE9FF,13));h.addView(mark,lp(44,44));LinearLayout labels=col(2);labels.setPadding(dp(12),0,0,0);labels.addView(text(title,18,INK,true));labels.addView(text(sub,11,MUTED,false));h.addView(labels);return h;}
+    private View header(String title,String sub){LinearLayout h=new LinearLayout(this);h.setGravity(Gravity.CENTER_VERTICAL);h.setPadding(dp(18),dp(12),dp(18),dp(12));TextView mark=text("N",23,ACCENT,true);mark.setGravity(Gravity.CENTER);mark.setBackground(shape(0xFFEDE9FF,0xFFEDE9FF,13));h.addView(mark,lp(44,44));LinearLayout labels=col(2);labels.setPadding(dp(12),0,0,0);labels.addView(text(title,18,INK,true));labels.addView(text(sub,11,MUTED,false));h.addView(labels);return h;}
     private TextView text(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
     private EditText field(String hint,boolean secret){EditText e=new EditText(this);e.setSingleLine(true);e.setTextSize(14);e.setTextColor(INK);e.setHintTextColor(MUTED);e.setHint(hint);e.setPadding(dp(14),0,dp(14),0);e.setBackground(shape(Color.WHITE,LINE,14));if(secret)e.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);return e;}
     private TextView button(String s,int bg,int fg){TextView t=text(s,14,fg,true);t.setGravity(Gravity.CENTER);t.setBackground(shape(bg,bg==Color.WHITE?LINE:bg,15));return t;}
