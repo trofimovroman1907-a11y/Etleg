@@ -1,0 +1,41 @@
+# Copy to the generated Synapse data directory as homeserver.yaml
+# Replace every example value. Do not expose this file or its signing key.
+server_name: "example.org"
+public_baseurl: "https://matrix.example.org/"
+pid_file: /data/homeserver.pid
+report_stats: false
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses: ['0.0.0.0']
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: "REPLACE_WITH_POSTGRES_PASSWORD"
+    database: synapse
+    host: postgres
+    cp_min: 5
+    cp_max: 10
+
+enable_registration: false
+enable_registration_without_verification: false
+allow_guest_access: false
+allow_public_rooms_over_federation: false
+report_stats: false
+
+# Keep admin APIs available only to authenticated server administrators.
+# Do not publish Synapse port 8008 directly; expose it only through Caddy.
+max_upload_size: 50M
+presence:
+  enabled: true
+
+# E2EE is negotiated by clients and room settings. Synapse does not decrypt
+# correctly encrypted Matrix room events.
