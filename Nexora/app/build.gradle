@@ -38,5 +38,6 @@ android {
 dependencies {
     // Official Matrix Rust SDK Android bindings. Includes the protocol/crypto
     // implementation; Nexora must use this API for E2EE rather than custom crypto.
-    implementation "org.matrix.rustcomponents:sdk-android:26.08.05"
+    implementation "org.matrix.rustcomponents:sdk-android:26.10.15"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2"
 }
