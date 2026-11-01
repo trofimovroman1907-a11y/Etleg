@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,11 +80,11 @@ public class MainActivity extends Activity {
         LinearLayout content = column(28);
         content.setPadding(dp(24), dp(36), dp(24), dp(24));
 
-        TextView brand = text("N", 24, Color.WHITE, true);
-        brand.setGravity(Gravity.CENTER);
-        brand.setBackground(round(ACCENT, 18));
-        LinearLayout.LayoutParams markLp = new LinearLayout.LayoutParams(dp(58), dp(58));
-        markLp.bottomMargin = dp(28);
+        ImageView brand = new ImageView(this);
+        brand.setImageResource(R.drawable.nexora_mark);
+        brand.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams markLp = new LinearLayout.LayoutParams(dp(68), dp(68));
+        markLp.bottomMargin = dp(22);
         content.addView(brand, markLp);
 
         content.addView(text("NEXORA", 13, ACCENT, true));
@@ -295,10 +296,10 @@ public class MainActivity extends Activity {
         LinearLayout bar = new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(20), dp(16), dp(20), dp(12));
-        TextView logo = text("N", 19, Color.WHITE, true);
-        logo.setGravity(Gravity.CENTER);
-        logo.setBackground(round(ACCENT, 12));
-        bar.addView(logo, params(40, 40));
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(R.drawable.nexora_mark);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        bar.addView(logo, params(42, 42));
         LinearLayout labels = column(2);
         labels.setPadding(dp(12), 0, 0, 0);
         labels.addView(text(title, 18, INK, true));
