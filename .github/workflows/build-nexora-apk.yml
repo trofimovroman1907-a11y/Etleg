@@ -1,0 +1,57 @@
+name: Build Nexora APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nexora-dev
+    paths:
+      - "Nexora/**"
+      - ".github/workflows/build-nexora-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: nexora-dev
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build Nexora debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace -p Nexora :app:assembleDebug
+
+      - name: Verify APK exists
+        run: |
+          APK="Nexora/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          file "$APK"
+          sha256sum "$APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nexora-Android-debug
+          path: Nexora/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
