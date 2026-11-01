@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
     private static final int LINE = Color.rgb(230, 230, 239);
 
     private final ExecutorService io = Executors.newSingleThreadExecutor();
+    private final ExecutorService syncIo = Executors.newSingleThreadExecutor();
     private final List<Room> rooms = new ArrayList<>();
     private LinearLayout root;
     private String homeserver;
@@ -183,7 +184,7 @@ public class MainActivity extends Activity {
     private void startSync() {
         if (syncing) return;
         syncing = true;
-        io.execute(() -> {
+        syncIo.execute(() -> {
             String next = syncToken == null ? "" : syncToken;
             try {
                 while (syncing && accessToken != null) {
@@ -413,5 +414,5 @@ public class MainActivity extends Activity {
     private String safe(String s){return s==null?"ошибка":s.length()>120?s.substring(0,120):s;}
     private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
     @Override public void onBackPressed(){if(activeRoomId!=null){activeRoomId=null;showChats();}else super.onBackPressed();}
-    @Override protected void onDestroy(){syncing=false;io.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){syncing=false;io.shutdownNow();syncIo.shutdownNow();super.onDestroy();}
 }
