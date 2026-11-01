@@ -399,6 +399,11 @@ public class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setClipToPadding(false);
+        GradientDrawable spacing = new GradientDrawable();
+        spacing.setColor(Color.TRANSPARENT);
+        spacing.setSize(dp(1), dp(gapDp));
+        layout.setDividerDrawable(spacing);
+        layout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
         return layout;
     }
 
