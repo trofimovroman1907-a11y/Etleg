@@ -1,25 +1,30 @@
-# Nexora Android
+# Nexora Android client
 
-Nexora is an independent Android messenger project.
-
-## Current stage
-
-- Native Android application shell.
-- Guest entry flow with an explicit channels-only notice.
-- Local sample channel catalogue for UI verification.
-- Separate Gradle project under `Nexora/`, so the existing Etleg Telegram-derived project remains untouched.
-- Backend, real account registration, remote channels, messaging, media, calls and end-to-end encryption are not enabled yet. They will be added and tested in separate stages; the app must not claim they work before integration.
+Nexora is an Android Matrix client. The app now uses the Matrix Client-Server API for login, room listing, room creation/invites, message history and sending text messages.
 
 ## Build
 
-From repository root:
+From this directory:
 
 ```bash
-./gradlew -p Nexora :app:assembleDebug
+./gradlew --no-daemon :app:assembleDebug
 ```
 
-APK output:
+## Connect
 
-`Nexora/app/build/outputs/apk/debug/app-debug.apk`
+On the login screen enter a Matrix homeserver URL (HTTPS), username and password. For a private Nexora deployment, use the homeserver URL configured by the server operator.
 
-The GitHub Actions workflow `.github/workflows/build-nexora-apk.yml` builds and uploads the debug APK.
+## Current implementation status
+
+- Real Matrix password login and logout.
+- Matrix account registration request (the homeserver may require registration tokens or disable public registration).
+- Joined-room list and room name lookup.
+- Create private rooms and invite a Matrix user ID.
+- Load the latest 50 text messages and send text messages.
+- Long-poll sync while the app is open.
+
+## Security and limitations
+
+This build currently sends ordinary Matrix `m.room.message` events. End-to-end encryption is **not yet implemented in this Android client**. Do not use it for sensitive conversations and do not describe this build as end-to-end encrypted. The Matrix Rust SDK / Kotlin bindings must be integrated before encrypted rooms, device verification, key backup and encrypted media can be enabled safely.
+
+This repository does not contain a deployed homeserver. A real Nexora service needs an always-on host, a domain with HTTPS, Synapse, PostgreSQL, backups, SMTP configuration and an operator-managed invitation policy. The app does not include server passwords or API secrets.

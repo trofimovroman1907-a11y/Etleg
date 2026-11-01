@@ -6,461 +6,396 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
-    private static final int BG = Color.rgb(245, 246, 250);
-    private static final int INK = Color.rgb(26, 31, 49);
-    private static final int MUTED = Color.rgb(126, 133, 153);
-    private static final int ACCENT = Color.rgb(86, 96, 207);
-    private static final int LINE = Color.rgb(231, 233, 241);
+    private static final int BG = Color.rgb(246, 246, 250);
+    private static final int INK = Color.rgb(28, 29, 43);
+    private static final int MUTED = Color.rgb(119, 122, 143);
+    private static final int ACCENT = Color.rgb(105, 75, 205);
+    private static final int LINE = Color.rgb(230, 230, 239);
 
+    private final ExecutorService io = Executors.newSingleThreadExecutor();
+    private final List<Room> rooms = new ArrayList<>();
     private LinearLayout root;
-    private boolean guestMode = false;
-    private String currentPage = "channels";
+    private String homeserver;
+    private String accessToken;
+    private String userId;
+    private String activeRoomId;
+    private String activeRoomName;
+    private volatile boolean syncing;
+    private long since;
+    private EditText messageInput;
+    private LinearLayout timeline;
+    private TextView statusView;
 
-    private static final class Channel {
-        final String name;
-        final String handle;
-        final String category;
-        final String description;
-        final String mark;
-        final int tint;
-        Channel(String name, String handle, String category, String description, String mark, int tint) {
-            this.name = name;
-            this.handle = handle;
-            this.category = category;
-            this.description = description;
-            this.mark = mark;
-            this.tint = tint;
+    private static final class Room {
+        String id;
+        String name;
+        String preview;
+        Room(String id, String name, String preview) {
+            this.id = id; this.name = name; this.preview = preview;
         }
     }
 
-    private final List<Channel> channels = new ArrayList<>();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(Color.WHITE);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        seedChannels();
-        showWelcome();
+        homeserver = getPreferences(0).getString("homeserver", "https://matrix.org");
+        accessToken = getPreferences(0).getString("token", null);
+        userId = getPreferences(0).getString("user", null);
+        if (accessToken != null && userId != null) loadRooms();
+        else showLogin();
     }
 
-    private void seedChannels() {
-        channels.add(new Channel("Город сегодня", "@city_today", "Новости",
-                "Коротко о событиях, людях и местах вокруг нас.", "Г", 0xFFE8ECFF));
-        channels.add(new Channel("Научная среда", "@science_daily", "Наука",
-                "Открытия, технологии и понятные объяснения сложного.", "Н", 0xFFE5F4EF));
-        channels.add(new Channel("Культурный код", "@culture_code", "Культура",
-                "Книги, кино, музыка и идеи для вдохновения.", "К", 0xFFFFF0DF));
-        channels.add(new Channel("Тихий дизайн", "@quiet_design", "Дизайн",
-                "Интерфейсы, типографика и визуальные находки.", "Д", 0xFFF4E9F8));
-        channels.add(new Channel("Игровая полка", "@game_shelf", "Игры",
-                "Новости индустрии и заметки о хороших играх.", "И", 0xFFFFE9E9));
-    }
-
-    private void showWelcome() {
-        root = baseRoot();
-        LinearLayout content = column(28);
-        content.setPadding(dp(24), dp(36), dp(24), dp(24));
-
-        ImageView brand = new ImageView(this);
-        brand.setImageResource(R.drawable.nexora_mark);
-        brand.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        LinearLayout.LayoutParams markLp = new LinearLayout.LayoutParams(dp(68), dp(68));
-        markLp.bottomMargin = dp(22);
-        content.addView(brand, markLp);
-
-        content.addView(text("NEXORA", 13, ACCENT, true));
-        TextView headline = text("Твоё общение.\nТвои правила.", 34, INK, true);
-        headline.setLineSpacing(dp(3), 1f);
-        LinearLayout.LayoutParams headLp = params(-1, -2);
-        headLp.topMargin = dp(10);
-        content.addView(headline, headLp);
-
-        TextView subtitle = text("Личные разговоры, сообщества и каналы — в одном спокойном пространстве.", 16, MUTED, false);
-        subtitle.setLineSpacing(dp(5), 1f);
-        LinearLayout.LayoutParams subLp = params(-1, -2);
-        subLp.topMargin = dp(14);
-        subLp.bottomMargin = dp(30);
-        content.addView(subtitle, subLp);
-
-        LinearLayout feature = cardColumn();
-        feature.addView(featureRow("01", "Приватность в основе", "Доступ к данным будет ограничен правилами аккаунта."));
-        addDivider(feature);
-        feature.addView(featureRow("02", "Свои каналы", "Читайте интересные публикации в удобном формате."));
-        addDivider(feature);
-        feature.addView(featureRow("03", "Без лишнего шума", "Чистый интерфейс и понятная навигация."));
-        content.addView(feature);
-
-        View spacer = new View(this);
-        content.addView(spacer, new LinearLayout.LayoutParams(1, 0, 1f));
-
-        TextView login = actionButton("Войти или создать аккаунт", ACCENT, Color.WHITE);
-        login.setOnClickListener(v -> showInfo("Авторизация", "Подключение регистрации, входа и подтверждения почты — следующий этап разработки. Сейчас сервер авторизации ещё не подключён."));
-        LinearLayout.LayoutParams loginLp = params(-1, 54);
-        loginLp.topMargin = dp(20);
-        content.addView(login, loginLp);
-
-        TextView guest = actionButton("Продолжить как гость", Color.WHITE, INK);
-        guest.setBackground(roundWithStroke(Color.WHITE, LINE, 16));
-        guest.setOnClickListener(v -> new AlertDialog.Builder(this)
-                .setTitle("Гостевой режим")
-                .setMessage("В гостевом режиме ты можешь только просматривать каналы. Отправлять сообщения, писать пользователям, звонить и загружать файлы нельзя.")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    guestMode = true;
-                    showChannels();
-                })
-                .show());
-        LinearLayout.LayoutParams guestLp = params(-1, 54);
-        guestLp.topMargin = dp(10);
-        content.addView(guest, guestLp);
-
-        TextView foot = text("NEXORA  ·  ПРЕДВАРИТЕЛЬНАЯ ВЕРСИЯ 0.1", 10, MUTED, true);
-        foot.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams footLp = params(-1, -2);
-        footLp.topMargin = dp(20);
-        content.addView(foot, footLp);
-
-        root.addView(content, new LinearLayout.LayoutParams(-1, 0, 1f));
+    private void showLogin() {
+        root = base();
+        LinearLayout page = col(14);
+        page.setPadding(dp(24), dp(32), dp(24), dp(24));
+        TextView logo = text("NEXORA", 14, ACCENT, true);
+        page.addView(logo);
+        TextView title = text("Твоё общение.\nТвои правила.", 32, INK, true);
+        LinearLayout.LayoutParams tl = lp(-1, -2); tl.topMargin = dp(12); page.addView(title, tl);
+        TextView hint = text("Войди на свой сервер Matrix. Nexora подключается напрямую к серверу и не хранит пароль.", 14, MUTED, false);
+        hint.setLineSpacing(dp(4), 1f); page.addView(hint);
+        EditText server = field("Адрес сервера, например https://chat.example.org", false);
+        server.setText(homeserver);
+        page.addView(server, lp(-1, 52));
+        EditText username = field("Имя пользователя", false);
+        page.addView(username, lp(-1, 52));
+        EditText password = field("Пароль", true);
+        page.addView(password, lp(-1, 52));
+        TextView login = button("Войти", ACCENT, Color.WHITE);
+        page.addView(login, lp(-1, 54));
+        TextView register = button("Создать аккаунт", Color.WHITE, INK);
+        register.setBackground(shape(Color.WHITE, LINE, 15));
+        page.addView(register, lp(-1, 54));
+        TextView note = text("Для закрытого сервера регистрация может быть доступна только по приглашению. Сервер должен быть настроен отдельно.", 12, MUTED, false);
+        note.setLineSpacing(dp(3), 1f); page.addView(note);
+        login.setOnClickListener(v -> authenticate(server.getText().toString(), username.getText().toString(),
+                password.getText().toString(), false));
+        register.setOnClickListener(v -> authenticate(server.getText().toString(), username.getText().toString(),
+                password.getText().toString(), true));
+        root.addView(page, new LinearLayout.LayoutParams(-1, 0, 1f));
         setContentView(root);
     }
 
-    private void showChannels() {
-        currentPage = "channels";
-        root = baseRoot();
-        root.addView(header("Каналы", "Гостевой просмотр"));
-        LinearLayout body = column(14);
-        body.setPadding(dp(20), dp(10), dp(20), dp(12));
+    private void authenticate(String server, String username, String password, boolean register) {
+        String base = server.trim().replaceAll("/+$", "");
+        if (!base.startsWith("https://") && !base.startsWith("http://")) {
+            toast("Укажи адрес сервера с https://"); return;
+        }
+        if (username.trim().isEmpty() || password.isEmpty()) { toast("Заполни имя и пароль"); return; }
+        homeserver = base;
+        showLoading(register ? "Создаём аккаунт…" : "Подключаемся…");
+        io.execute(() -> {
+            try {
+                JSONObject body = new JSONObject();
+                body.put("username", username.trim());
+                body.put("password", password);
+                JSONObject response;
+                if (register) {
+                    body.put("auth", new JSONObject());
+                    response = request("POST", homeserver + "/_matrix/client/v3/register", null, body);
+                } else {
+                    JSONObject identifier = new JSONObject();
+                    identifier.put("type", "m.id.user");
+                    identifier.put("user", username.trim());
+                    body.put("identifier", identifier);
+                    body.put("type", "m.login.password");
+                    response = request("POST", homeserver + "/_matrix/client/v3/login", null, body);
+                }
+                String token = response.optString("access_token", "");
+                String id = response.optString("user_id", "");
+                if (token.isEmpty() || id.isEmpty()) throw new Exception("Сервер не вернул сессию.");
+                accessToken = token; userId = id;
+                getPreferences(0).edit().putString("homeserver", homeserver)
+                        .putString("token", token).putString("user", id).apply();
+                runOnUiThread(this::loadRooms);
+            } catch (Exception e) {
+                String msg = e.getMessage() == null ? "Не удалось подключиться" : e.getMessage();
+                runOnUiThread(() -> { showLogin(); toast(msg); });
+            }
+        });
+    }
 
-        TextView intro = text("Читайте то, что интересно", 23, INK, true);
-        body.addView(intro);
-        body.addView(text("В гостевом режиме доступен только просмотр публикаций.", 13, MUTED, false));
+    private void loadRooms() {
+        showLoading("Загружаем чаты…");
+        io.execute(() -> {
+            try {
+                JSONObject sync = request("GET", homeserver + "/_matrix/client/v3/sync?timeout=0", accessToken, null);
+                since = sync.optString("next_batch", "").hashCode();
+                parseRooms(sync);
+                runOnUiThread(this::showChats);
+                startSync();
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    if (e.getMessage() != null && e.getMessage().contains("401")) logout();
+                    else { showLogin(); toast("Ошибка подключения: " + safe(e.getMessage())); }
+                });
+            }
+        });
+    }
 
-        EditText search = new EditText(this);
-        search.setSingleLine(true);
-        search.setTextSize(14);
-        search.setTextColor(INK);
-        search.setHintTextColor(MUTED);
-        search.setHint("Поиск каналов");
-        search.setPadding(dp(16), 0, dp(16), 0);
-        search.setBackground(roundWithStroke(Color.WHITE, LINE, 14));
-        LinearLayout.LayoutParams searchLp = params(-1, 50);
-        searchLp.topMargin = dp(8);
-        body.addView(search, searchLp);
+    private void startSync() {
+        if (syncing) return;
+        syncing = true;
+        io.execute(() -> {
+            String next = "";
+            try {
+                JSONObject initial = request("GET", homeserver + "/_matrix/client/v3/sync?timeout=0", accessToken, null);
+                next = initial.optString("next_batch", "");
+                parseRooms(initial);
+                runOnUiThread(() -> { if (accessToken != null) showChats(); });
+                while (syncing && accessToken != null) {
+                    String url = homeserver + "/_matrix/client/v3/sync?timeout=25000&since=" + enc(next);
+                    JSONObject data = request("GET", url, accessToken, null);
+                    next = data.optString("next_batch", next);
+                    parseRooms(data);
+                    final String room = activeRoomId;
+                    runOnUiThread(() -> {
+                        if (accessToken != null && activeRoomId == null) refreshRoomList();
+                        else if (room != null && room.equals(activeRoomId)) refreshTimeline();
+                    });
+                }
+            } catch (Exception ignored) {
+                syncing = false;
+                if (accessToken != null) runOnUiThread(() -> toast("Соединение прервано. Открой список чатов для повтора."));
+            }
+        });
+    }
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.setFillViewport(false);
-        LinearLayout list = column(10);
-        list.setPadding(0, dp(4), 0, dp(12));
-        for (Channel channel : channels) list.addView(channelCard(channel));
-        scroll.addView(list);
-        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(-1, 0, 1f);
-        scrollLp.topMargin = dp(4);
-        body.addView(scroll, scrollLp);
-
-        search.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                list.removeAllViews();
-                String query = s.toString().toLowerCase(Locale.ROOT).trim();
-                for (Channel channel : channels) {
-                    if (channel.name.toLowerCase(Locale.ROOT).contains(query)
-                            || channel.handle.toLowerCase(Locale.ROOT).contains(query)
-                            || channel.category.toLowerCase(Locale.ROOT).contains(query)) {
-                        list.addView(channelCard(channel));
+    private void parseRooms(JSONObject sync) {
+        JSONObject joined = sync.optJSONObject("rooms");
+        if (joined == null) return;
+        JSONObject join = joined.optJSONObject("join");
+        if (join == null) return;
+        Iterator<String> keys = join.keys();
+        synchronized (rooms) {
+            while (keys.hasNext()) {
+                String id = keys.next();
+                JSONObject data = join.optJSONObject(id);
+                String name = id;
+                JSONObject state = data == null ? null : data.optJSONObject("state");
+                JSONArray events = state == null ? null : state.optJSONArray("events");
+                if (events != null) for (int i=0;i<events.length();i++) {
+                    JSONObject ev = events.optJSONObject(i);
+                    if (ev != null && "m.room.name".equals(ev.optString("type"))) {
+                        name = ev.optJSONObject("content") == null ? name : ev.optJSONObject("content").optString("name", name);
                     }
                 }
-                if (list.getChildCount() == 0) {
-                    TextView empty = text("Ничего не найдено", 14, MUTED, false);
-                    empty.setGravity(Gravity.CENTER);
-                    list.addView(empty, params(-1, 72));
-                }
+                boolean found=false;
+                for (Room r : rooms) if (r.id.equals(id)) { r.name=name; found=true; break; }
+                if (!found) rooms.add(new Room(id, name, "Открыть переписку"));
             }
-            @Override public void afterTextChanged(Editable s) {}
-        });
-
-        root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1f));
-        root.addView(bottomBar("channels"));
-        setContentView(root);
-    }
-
-    private void showExplore() {
-        currentPage = "explore";
-        root = baseRoot();
-        root.addView(header("Обзор", "Подборка Nexora"));
-        LinearLayout body = column(12);
-        body.setPadding(dp(20), dp(14), dp(20), dp(18));
-        body.addView(text("Найди свою тему", 24, INK, true));
-        body.addView(text("Выбирай интересное и открывай каналы для чтения.", 13, MUTED, false));
-        String[] categories = {"Новости", "Наука", "Культура", "Дизайн", "Игры"};
-        for (String category : categories) {
-            TextView item = actionButton(category + "   →", Color.WHITE, INK);
-            item.setGravity(Gravity.CENTER_VERTICAL);
-            item.setPadding(dp(18), 0, dp(18), 0);
-            item.setBackground(roundWithStroke(Color.WHITE, LINE, 14));
-            item.setOnClickListener(v -> {
-                showChannels();
-                Toast.makeText(this, "Найди каналы в категории «" + category + "»", Toast.LENGTH_SHORT).show();
-            });
-            body.addView(item, params(-1, 54));
         }
-        View spacer = new View(this);
-        body.addView(spacer, new LinearLayout.LayoutParams(1, 0, 1f));
-        body.addView(noteCard("Гостевой доступ", "Ты можешь читать открытые каналы. Для личных сообщений и звонков понадобится аккаунт."));
-        root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1f));
-        root.addView(bottomBar("explore"));
-        setContentView(root);
     }
 
-    private void showProfile() {
-        currentPage = "profile";
-        root = baseRoot();
-        root.addView(header("Профиль", "Режим просмотра"));
-        LinearLayout body = column(12);
-        body.setPadding(dp(20), dp(18), dp(20), dp(18));
-        TextView avatar = text("Г", 28, ACCENT, true);
-        avatar.setGravity(Gravity.CENTER);
-        avatar.setBackground(round(0xFFE8ECFF, 30));
-        body.addView(avatar, params(68, 68));
-        body.addView(text("Гость Nexora", 22, INK, true));
-        body.addView(text("Без регистрации · Только чтение каналов", 13, MUTED, false));
-        body.addView(noteCard("Ограничения гостя", "Личные сообщения, отправка файлов, голосовые сообщения и звонки доступны после регистрации."));
-        TextView signIn = actionButton("Войти или создать аккаунт", ACCENT, Color.WHITE);
-        signIn.setOnClickListener(v -> showInfo("Авторизация", "Сервер регистрации и отправки кодов подтверждения ещё не подключён. Этот экран появится после настройки backend."));
-        body.addView(signIn, params(-1, 52));
-        TextView back = actionButton("Выйти из гостевого режима", Color.WHITE, INK);
-        back.setBackground(roundWithStroke(Color.WHITE, LINE, 14));
-        back.setOnClickListener(v -> {
-            guestMode = false;
-            showWelcome();
-        });
-        body.addView(back, params(-1, 52));
-        root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1f));
-        root.addView(bottomBar("profile"));
-        setContentView(root);
+    private void showChats() {
+        root = base();
+        root.addView(header("Сообщения", userId == null ? "Nexora" : userId));
+        LinearLayout body = col(10); body.setPadding(dp(18), dp(12), dp(18), dp(12));
+        TextView add = button("＋  Начать переписку", ACCENT, Color.WHITE);
+        add.setOnClickListener(v -> showCreateRoom());
+        body.addView(add, lp(-1, 50));
+        statusView = text("Подключено к " + homeserver, 12, MUTED, false);
+        body.addView(statusView);
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout list = col(8); list.setPadding(0, dp(4), 0, dp(12));
+        synchronized (rooms) {
+            for (Room room : rooms) {
+                LinearLayout card = new LinearLayout(this);
+                card.setGravity(Gravity.CENTER_VERTICAL); card.setPadding(dp(14), dp(12), dp(14), dp(12));
+                card.setBackground(shape(Color.WHITE, LINE, 15));
+                TextView avatar = text(initial(room.name), 18, ACCENT, true);
+                avatar.setGravity(Gravity.CENTER); avatar.setBackground(shape(0xFFEDE9FF, 18));
+                card.addView(avatar, lp(46,46));
+                LinearLayout labels=col(3); labels.setPadding(dp(12),0,0,0);
+                labels.addView(text(room.name,15,INK,true));
+                labels.addView(text(room.preview,12,MUTED,false));
+                card.addView(labels,new LinearLayout.LayoutParams(0,-2,1));
+                card.setOnClickListener(v -> openRoom(room));
+                list.addView(card, lp(-1,-2));
+            }
+        }
+        if (list.getChildCount()==0) list.addView(note("Пока нет чатов","Создай комнату или попроси друга пригласить тебя по Matrix ID."));
+        scroll.addView(list); body.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        TextView logout = text("Выйти из аккаунта", 13, MUTED, true);
+        logout.setGravity(Gravity.CENTER); logout.setPadding(0,dp(12),0,dp(12));
+        logout.setOnClickListener(v -> logout()); body.addView(logout);
+        root.addView(body,new LinearLayout.LayoutParams(-1,0,1)); setContentView(root);
     }
 
-    private void showChannelDetail(Channel channel) {
-        currentPage = "detail";
-        root = baseRoot();
-        LinearLayout top = column(4);
-        top.setPadding(dp(20), dp(18), dp(20), dp(14));
-        TextView back = text("‹  Все каналы", 14, ACCENT, true);
-        back.setOnClickListener(v -> showChannels());
-        top.addView(back);
+    private void refreshRoomList() {
+        if (activeRoomId == null) showChats();
+    }
+
+    private void showCreateRoom() {
+        LinearLayout form=col(10); form.setPadding(dp(8),dp(8),dp(8),dp(8));
+        EditText name=field("Название комнаты",false);
+        EditText invite=field("Matrix ID участника (необязательно)",false);
+        form.addView(name); form.addView(invite);
+        new AlertDialog.Builder(this).setTitle("Новая переписка").setView(form)
+                .setNegativeButton("Отмена",null).setPositiveButton("Создать",(d,w)->{
+                    String roomName=name.getText().toString().trim();
+                    String member=invite.getText().toString().trim();
+                    if(roomName.isEmpty()){toast("Укажи название");return;}
+                    io.execute(()->{
+                        try{
+                            JSONObject body=new JSONObject(); body.put("name",roomName); body.put("preset","private_chat");
+                            body.put("visibility","private"); body.put("invite",new JSONArray());
+                            JSONObject created=request("POST",homeserver+"/_matrix/client/v3/createRoom",accessToken,body);
+                            String id=created.getString("room_id");
+                            if(!member.isEmpty()){
+                                JSONObject inviteBody=new JSONObject(); inviteBody.put("user_id",member);
+                                request("POST",homeserver+"/_matrix/client/v3/rooms/"+enc(id)+"/invite",accessToken,inviteBody);
+                            }
+                            runOnUiThread(()->{toast("Комната создана"); loadRooms();});
+                        }catch(Exception e){runOnUiThread(()->toast("Не удалось создать: "+safe(e.getMessage())));}
+                    });
+                }).show();
+    }
+
+    private void openRoom(Room room) {
+        activeRoomId=room.id; activeRoomName=room.name;
+        root=base();
+        LinearLayout top=new LinearLayout(this); top.setGravity(Gravity.CENTER_VERTICAL); top.setPadding(dp(16),dp(10),dp(16),dp(10));
+        TextView back=text("‹",32,ACCENT,true); back.setOnClickListener(v->{activeRoomId=null;showChats();});
+        top.addView(back,lp(40,48));
+        top.addView(text(room.name,18,INK,true),new LinearLayout.LayoutParams(0,-2,1));
         root.addView(top);
-        LinearLayout body = column(14);
-        body.setPadding(dp(20), dp(8), dp(20), dp(20));
-        TextView icon = text(channel.mark, 28, ACCENT, true);
-        icon.setGravity(Gravity.CENTER);
-        icon.setBackground(round(channel.tint, 20));
-        body.addView(icon, params(68, 68));
-        body.addView(text(channel.name, 26, INK, true));
-        body.addView(text(channel.handle + "  ·  " + channel.category, 13, MUTED, false));
-        body.addView(noteCard("О канале", channel.description));
-        body.addView(noteCard("Публикации", "В этой ранней версии показан интерфейс канала. Подключение реальных публикаций и серверной ленты будет следующим этапом."));
-        View spacer = new View(this);
-        body.addView(spacer, new LinearLayout.LayoutParams(1, 0, 1f));
-        TextView guestNote = text("Гостевой режим: доступен только просмотр.", 12, MUTED, false);
-        guestNote.setGravity(Gravity.CENTER);
-        body.addView(guestNote);
-        root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1f));
-        setContentView(root);
+        ScrollView scroll=new ScrollView(this); timeline=col(8); timeline.setPadding(dp(14),dp(12),dp(14),dp(12));
+        scroll.addView(timeline); root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        LinearLayout composer=new LinearLayout(this); composer.setGravity(Gravity.CENTER_VERTICAL);
+        composer.setPadding(dp(12),dp(8),dp(12),dp(8)); composer.setBackgroundColor(Color.WHITE);
+        messageInput=field("Сообщение",false); composer.addView(messageInput,new LinearLayout.LayoutParams(0,dp(48),1));
+        TextView send=button("➤",ACCENT,Color.WHITE); LinearLayout.LayoutParams sp=lp(52,48);sp.leftMargin=dp(8);composer.addView(send,sp);
+        send.setOnClickListener(v->sendMessage());
+        root.addView(composer); setContentView(root); refreshTimeline();
     }
 
-    private LinearLayout baseRoot() {
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setBackgroundColor(BG);
-        return layout;
-    }
-
-    private View header(String title, String subtitle) {
-        LinearLayout bar = new LinearLayout(this);
-        bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setPadding(dp(20), dp(16), dp(20), dp(12));
-        ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.nexora_mark);
-        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        bar.addView(logo, params(42, 42));
-        LinearLayout labels = column(2);
-        labels.setPadding(dp(12), 0, 0, 0);
-        labels.addView(text(title, 18, INK, true));
-        labels.addView(text(subtitle, 11, MUTED, false));
-        bar.addView(labels, new LinearLayout.LayoutParams(0, -2, 1f));
-        TextView badge = text("G", 13, ACCENT, true);
-        badge.setGravity(Gravity.CENTER);
-        badge.setBackground(round(0xFFE8ECFF, 24));
-        bar.addView(badge, params(34, 34));
-        return bar;
-    }
-
-    private View bottomBar(String selected) {
-        LinearLayout nav = new LinearLayout(this);
-        nav.setBackgroundColor(Color.WHITE);
-        nav.setPadding(dp(8), dp(8), dp(8), dp(8));
-        nav.setGravity(Gravity.CENTER);
-        nav.addView(navItem("Каналы", "channels", selected), new LinearLayout.LayoutParams(0, dp(54), 1f));
-        nav.addView(navItem("Обзор", "explore", selected), new LinearLayout.LayoutParams(0, dp(54), 1f));
-        nav.addView(navItem("Профиль", "profile", selected), new LinearLayout.LayoutParams(0, dp(54), 1f));
-        return nav;
-    }
-
-    private View navItem(String label, String page, String selected) {
-        TextView item = text(label, 12, selected.equals(page) ? ACCENT : MUTED, selected.equals(page));
-        item.setGravity(Gravity.CENTER);
-        item.setOnClickListener(v -> {
-            if ("channels".equals(page)) showChannels();
-            else if ("explore".equals(page)) showExplore();
-            else showProfile();
+    private void refreshTimeline() {
+        if (activeRoomId == null || timeline == null) return;
+        final String room=activeRoomId;
+        io.execute(()->{
+            try{
+                JSONObject data=request("GET",homeserver+"/_matrix/client/v3/rooms/"+enc(room)+"/messages?dir=b&limit=50",accessToken,null);
+                JSONArray events=data.optJSONArray("chunk"); List<String[]> messages=new ArrayList<>();
+                if(events!=null) for(int i=events.length()-1;i>=0;i--){
+                    JSONObject ev=events.optJSONObject(i); if(ev==null)continue;
+                    JSONObject content=ev.optJSONObject("content");
+                    if("m.room.message".equals(ev.optString("type")) && content!=null){
+                        String body=content.optString("body","");
+                        String sender=ev.optString("sender","");
+                        messages.add(new String[]{sender,body});
+                    }
+                }
+                runOnUiThread(()->{
+                    if(!room.equals(activeRoomId)||timeline==null)return;
+                    timeline.removeAllViews();
+                    if(messages.isEmpty())timeline.addView(note("Начало переписки","Отправь первое сообщение."));
+                    for(String[] m:messages){
+                        boolean mine=userId.equals(m[0]);
+                        TextView bubble=text((mine?"Вы":"")+(mine?"\n":"")+m[1],14,mine?Color.WHITE:INK,false);
+                        bubble.setPadding(dp(13),dp(10),dp(13),dp(10));
+                        bubble.setBackground(shape(mine?ACCENT:Color.WHITE,mine?ACCENT:LINE,15));
+                        LinearLayout row=new LinearLayout(this); row.setGravity(mine?Gravity.RIGHT:Gravity.LEFT);
+                        row.addView(bubble,new LinearLayout.LayoutParams(-2,-2)); timeline.addView(row);
+                    }
+                });
+            }catch(Exception e){runOnUiThread(()->toast("Не удалось загрузить сообщения"));}
         });
-        return item;
     }
 
-    private View channelCard(Channel channel) {
-        LinearLayout card = new LinearLayout(this);
-        card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding(dp(14), dp(13), dp(14), dp(13));
-        card.setBackground(roundWithStroke(Color.WHITE, LINE, 16));
-
-        TextView avatar = text(channel.mark, 18, ACCENT, true);
-        avatar.setGravity(Gravity.CENTER);
-        avatar.setBackground(round(channel.tint, 14));
-        card.addView(avatar, params(48, 48));
-
-        LinearLayout labels = column(4);
-        labels.setPadding(dp(12), 0, dp(8), 0);
-        labels.addView(text(channel.name, 15, INK, true));
-        labels.addView(text(channel.handle + "  ·  " + channel.category, 11, MUTED, false));
-        card.addView(labels, new LinearLayout.LayoutParams(0, -2, 1f));
-        TextView arrow = text("›", 24, MUTED, false);
-        card.addView(arrow);
-        card.setOnClickListener(v -> showChannelDetail(channel));
-        return card;
+    private void sendMessage() {
+        if(messageInput==null||activeRoomId==null)return;
+        String body=messageInput.getText().toString().trim(); if(body.isEmpty())return;
+        String room=activeRoomId; messageInput.setText("");
+        io.execute(()->{
+            try{
+                JSONObject content=new JSONObject(); content.put("msgtype","m.text"); content.put("body",body);
+                request("PUT",homeserver+"/_matrix/client/v3/rooms/"+enc(room)+"/send/m.room.message/"+UUID.randomUUID(),accessToken,content);
+                refreshTimeline();
+            }catch(Exception e){runOnUiThread(()->toast("Сообщение не отправлено: "+safe(e.getMessage())));}
+        });
     }
 
-    private View featureRow(String number, String title, String desc) {
-        LinearLayout row = new LinearLayout(this);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        TextView num = text(number, 11, ACCENT, true);
-        num.setGravity(Gravity.CENTER);
-        num.setBackground(round(0xFFE8ECFF, 10));
-        row.addView(num, params(36, 36));
-        LinearLayout labels = column(3);
-        labels.setPadding(dp(12), 0, 0, 0);
-        labels.addView(text(title, 14, INK, true));
-        labels.addView(text(desc, 11, MUTED, false));
-        row.addView(labels, new LinearLayout.LayoutParams(0, -2, 1f));
-        return row;
-    }
-
-    private View noteCard(String title, String body) {
-        LinearLayout card = cardColumn();
-        card.addView(text(title, 14, INK, true));
-        TextView desc = text(body, 13, MUTED, false);
-        desc.setLineSpacing(dp(4), 1f);
-        card.addView(desc);
-        return card;
-    }
-
-    private LinearLayout cardColumn() {
-        LinearLayout card = column(12);
-        card.setPadding(dp(16), dp(16), dp(16), dp(16));
-        card.setBackground(roundWithStroke(Color.WHITE, LINE, 16));
-        return card;
-    }
-
-    private void addDivider(LinearLayout parent) {
-        View divider = new View(this);
-        divider.setBackgroundColor(LINE);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, dp(1));
-        lp.topMargin = dp(2);
-        lp.bottomMargin = dp(2);
-        parent.addView(divider, lp);
-    }
-
-    private LinearLayout column(int gapDp) {
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setClipToPadding(false);
-        GradientDrawable spacing = new GradientDrawable();
-        spacing.setColor(Color.TRANSPARENT);
-        spacing.setSize(dp(1), dp(gapDp));
-        layout.setDividerDrawable(spacing);
-        layout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-        return layout;
-    }
-
-    private TextView text(String value, int size, int color, boolean bold) {
-        TextView view = new TextView(this);
-        view.setText(value);
-        view.setTextSize(size);
-        view.setTextColor(color);
-        view.setTypeface(Typeface.create("sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL));
-        return view;
-    }
-
-    private TextView actionButton(String value, int background, int foreground) {
-        TextView button = text(value, 14, foreground, true);
-        button.setGravity(Gravity.CENTER);
-        button.setBackground(round(background, 15));
-        button.setClickable(true);
-        button.setFocusable(true);
-        return button;
-    }
-
-    private GradientDrawable round(int color, int radiusDp) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setColor(color);
-        drawable.setCornerRadius(dp(radiusDp));
-        return drawable;
-    }
-
-    private GradientDrawable roundWithStroke(int color, int stroke, int radiusDp) {
-        GradientDrawable drawable = round(color, radiusDp);
-        drawable.setStroke(dp(1), stroke);
-        return drawable;
-    }
-
-    private LinearLayout.LayoutParams params(int width, int height) {
-        return new LinearLayout.LayoutParams(width < 0 ? width : dp(width), height < 0 ? height : dp(height));
-    }
-
-    private int dp(int value) {
-        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
-    }
-
-    private void showInfo(String title, String message) {
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("Понятно", null)
-                .show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (guestMode && !"channels".equals(currentPage)) {
-            showChannels();
-            return;
+    private JSONObject request(String method,String address,String token,JSONObject body)throws Exception{
+        HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
+        c.setRequestMethod(method); c.setConnectTimeout(15000); c.setReadTimeout(35000);
+        c.setRequestProperty("Accept","application/json");
+        if(token!=null)c.setRequestProperty("Authorization","Bearer "+token);
+        if(body!=null){c.setDoOutput(true);c.setRequestProperty("Content-Type","application/json; charset=utf-8");
+            try(OutputStream out=c.getOutputStream()){out.write(body.toString().getBytes(StandardCharsets.UTF_8));}}
+        int code=c.getResponseCode(); InputStream stream=code>=200&&code<300?c.getInputStream():c.getErrorStream();
+        StringBuilder result=new StringBuilder();
+        if(stream!=null)try(BufferedReader reader=new BufferedReader(new InputStreamReader(stream,StandardCharsets.UTF_8))){
+            String line;while((line=reader.readLine())!=null)result.append(line);
         }
-        super.onBackPressed();
+        c.disconnect();
+        if(code<200||code>=300){
+            String error="HTTP "+code;
+            try{error=new JSONObject(result.toString()).optString("error",error);}catch(Exception ignored){}
+            throw new Exception(code+" "+error);
+        }
+        return result.length()==0?new JSONObject():new JSONObject(result.toString());
     }
+
+    private void logout(){
+        syncing=false; String token=accessToken;
+        io.execute(()->{try{if(token!=null)request("POST",homeserver+"/_matrix/client/v3/logout",token,new JSONObject());}catch(Exception ignored){}});
+        accessToken=null;userId=null;activeRoomId=null;rooms.clear();
+        getPreferences(0).edit().remove("token").remove("user").apply();showLogin();
+    }
+
+    private void showLoading(String message){
+        root=base(); LinearLayout box=col(12);box.setGravity(Gravity.CENTER);box.setPadding(dp(24),dp(24),dp(24),dp(24));
+        box.addView(text("NEXORA",14,ACCENT,true));box.addView(text(message,16,INK,false));
+        root.addView(box,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
+    }
+
+    private LinearLayout base(){LinearLayout l=new LinearLayout(this);l.setOrientation(1);l.setBackgroundColor(BG);return l;}
+    private LinearLayout col(int gap){LinearLayout l=new LinearLayout(this);l.setOrientation(1);GradientDrawable d=new GradientDrawable();d.setColor(Color.TRANSPARENT);d.setSize(dp(1),dp(gap));l.setDividerDrawable(d);l.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);return l;}
+    private View header(String title,String sub){LinearLayout h=new LinearLayout(this);h.setGravity(Gravity.CENTER_VERTICAL);h.setPadding(dp(18),dp(12),dp(18),dp(12));TextView mark=text("N",23,ACCENT,true);mark.setGravity(Gravity.CENTER);mark.setBackground(shape(0xFFEDE9FF,13));h.addView(mark,lp(44,44));LinearLayout labels=col(2);labels.setPadding(dp(12),0,0,0);labels.addView(text(title,18,INK,true));labels.addView(text(sub,11,MUTED,false));h.addView(labels);return h;}
+    private TextView text(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
+    private EditText field(String hint,boolean secret){EditText e=new EditText(this);e.setSingleLine(true);e.setTextSize(14);e.setTextColor(INK);e.setHintTextColor(MUTED);e.setHint(hint);e.setPadding(dp(14),0,dp(14),0);e.setBackground(shape(Color.WHITE,LINE,14));if(secret)e.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);return e;}
+    private TextView button(String s,int bg,int fg){TextView t=text(s,14,fg,true);t.setGravity(Gravity.CENTER);t.setBackground(shape(bg,bg==Color.WHITE?LINE:bg,15));return t;}
+    private View note(String title,String body){LinearLayout c=col(7);c.setPadding(dp(16),dp(16),dp(16),dp(16));c.setBackground(shape(Color.WHITE,LINE,15));c.addView(text(title,14,INK,true));TextView b=text(body,12,MUTED,false);b.setLineSpacing(dp(3),1f);c.addView(b);return c;}
+    private GradientDrawable shape(int color,int stroke,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));if(stroke!=color)d.setStroke(dp(1),stroke);return d;}
+    private LinearLayout.LayoutParams lp(int w,int h){return new LinearLayout.LayoutParams(w<0?w:dp(w),h<0?h:dp(h));}
+    private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
+    private String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8").replace("+","%20");}
+    private String initial(String s){return s==null||s.isEmpty()?"N":s.substring(0,1).toUpperCase();}
+    private String safe(String s){return s==null?"ошибка":s.length()>120?s.substring(0,120):s;}
+    private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
+    @Override public void onBackPressed(){if(activeRoomId!=null){activeRoomId=null;showChats();}else super.onBackPressed();}
+    @Override protected void onDestroy(){syncing=false;io.shutdownNow();super.onDestroy();}
 }
