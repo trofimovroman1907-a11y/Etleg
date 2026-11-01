@@ -1,0 +1,12 @@
+{
+  email {$ACME_EMAIL}
+}
+
+{$MATRIX_DOMAIN} {
+  encode zstd gzip
+
+  @matrix path /_matrix/* /_synapse/client/*
+  reverse_proxy @matrix synapse:8008
+
+  respond /health 200
+}
