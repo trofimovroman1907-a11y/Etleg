@@ -9,6 +9,7 @@ import org.matrix.rustcomponents.sdk.CreateRoomParameters
 import org.matrix.rustcomponents.sdk.RoomPreset
 import org.matrix.rustcomponents.sdk.RoomVisibility
 import org.matrix.rustcomponents.sdk.Session
+import org.matrix.rustcomponents.sdk.messageEventContentFromMarkdown
 import org.matrix.rustcomponents.sdk.SlidingSyncVersion
 
 /**
@@ -54,10 +55,10 @@ class MatrixE2eeClient private constructor(
         require(text.isNotBlank()) { "Пустое сообщение" }
         val room = client.getRoom(roomId)
             ?: throw IllegalStateException("Комната не найдена")
-        val payload = JSONObject()
-            .put("msgtype", "m.text")
-            .put("body", text)
-        room.sendRaw("m.room.message", payload.toString())
+        // Timeline.send() routes the event through the SDK send queue.
+        // The Rust SDK transparently encrypts it when the room is encrypted.
+        val timeline = room.timeline()
+        timeline.send(messageEventContentFromMarkdown(text))
     }
 
     fun logout() = runBlocking {
