@@ -6,7 +6,7 @@ import org.json.JSONObject
 import org.matrix.rustcomponents.sdk.Client
 import org.matrix.rustcomponents.sdk.ClientBuilder
 import org.matrix.rustcomponents.sdk.CreateRoomParameters
-import org.matrix.rustcomponents.sdk.EncryptionState
+import uniffi.matrix_sdk_base.EncryptionState
 import org.matrix.rustcomponents.sdk.Membership
 import org.matrix.rustcomponents.sdk.MsgLikeKind
 import org.matrix.rustcomponents.sdk.RoomPreset
@@ -38,10 +38,12 @@ class MatrixE2eeClient private constructor(
     val deviceId: String get() = client.deviceId()
     val accessToken: String get() = client.session().accessToken
 
-    private val syncService = client.syncService()
-        .withSharePos(true)
-        .withOfflineMode()
-        .finish()
+    private val syncService = runBlocking {
+        client.syncService()
+            .withSharePos(true)
+            .withOfflineMode()
+            .finish()
+    }
 
     @Volatile private var activeTimeline: Timeline? = null
     @Volatile private var activeTimelineTask: TaskHandle? = null
