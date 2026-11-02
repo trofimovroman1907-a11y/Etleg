@@ -25,8 +25,10 @@ database:
     cp_min: 5
     cp_max: 10
 
-enable_registration: false
+# Allow registration only with administrator-issued invitation tokens.
+enable_registration: true
 enable_registration_without_verification: false
+registration_requires_token: true
 allow_guest_access: false
 allow_public_rooms_over_federation: false
 report_stats: false
