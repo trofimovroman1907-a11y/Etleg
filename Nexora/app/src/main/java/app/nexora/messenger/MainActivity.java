@@ -229,13 +229,12 @@ public class MainActivity extends Activity {
         passwordParams.topMargin = dp(8);
         page.addView(password, passwordParams);
 
-        EditText invitation = null;
+        final EditText invitation = registrationMode ? field("Код от администратора сервера", false) : null;
         if (registrationMode) {
             TextView invitationLabel = label("КОД ПРИГЛАШЕНИЯ");
             LinearLayout.LayoutParams invitationLabelParams = lp(-1, -2);
             invitationLabelParams.topMargin = dp(18);
             page.addView(invitationLabel, invitationLabelParams);
-            invitation = field("Код от администратора сервера", false);
             LinearLayout.LayoutParams invitationParams = lp(-1, 56);
             invitationParams.topMargin = dp(8);
             page.addView(invitation, invitationParams);
